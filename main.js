@@ -78,14 +78,14 @@ function createChatWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
   chatWin = new BrowserWindow({
-    width: 660,
+    width: 900,
     height: 640,
     frame: false,
     transparent: false,
     alwaysOnTop: false,
     resizable: true,
     title: '🐵 AI 对话',
-    x: Math.round((width - 560) / 2),
+    x: Math.round((width - 900) / 2),
     y: Math.round((height - 640) / 2),
     webPreferences: {
       nodeIntegration: true,
