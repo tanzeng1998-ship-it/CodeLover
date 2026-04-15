@@ -6,55 +6,169 @@
   <title>恋人代码</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    ::-webkit-scrollbar { display: none; }
+    * { scrollbar-width: none; -ms-overflow-style: none; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f5f5f5;
+      background:
+        radial-gradient(circle at 75% 35%, rgba(80, 110, 180, 0.22) 0%, transparent 45%),
+        radial-gradient(circle at 25% 70%, rgba(35, 55, 110, 0.2) 0%, transparent 40%),
+        linear-gradient(180deg, #0b1a43 0%, #0a1536 55%, #0a1432 100%);
+      color: #e8ddbf;
       height: 100vh;
       display: flex;
       overflow: hidden;
     }
-    /* 侧边栏 */
-    .sidebar {
-      width: 160px;
-      background: linear-gradient(180deg, #2a2a3e 0%, #1a1a2e 100%);
+    /* ===== 左侧：可折叠会话面板 ===== */
+    .session-panel {
+      width: 180px;
+      background: linear-gradient(180deg, rgba(16, 35, 88, 0.96) 0%, rgba(12, 27, 70, 0.98) 100%);
       display: flex;
       flex-direction: column;
-      border-right: 1px solid #3a3a4e;
+      border-right: 1px solid rgba(189, 161, 102, 0.45);
+      box-shadow: inset -1px 0 0 rgba(255, 221, 151, 0.12);
+      transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      flex-shrink: 0;
+      position: relative;
     }
-    .sidebar-header {
-      padding: 15px;
+    .session-panel.collapsed {
+      width: 32px;
+    }
+    .session-panel.collapsed .session-panel-content {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .session-panel-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.22s, visibility 0.22s;
+    }
+    /* 折叠/展开按钮 */
+    .session-toggle {
+      position: absolute;
+      top: 10px;
+      right: 5px;
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      border: 1px solid rgba(189, 161, 102, 0.45);
+      background: rgba(14, 28, 70, 0.9);
+      color: #c8b48a;
+      font-size: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      z-index: 10;
+    }
+    .session-toggle:hover {
+      background: rgba(96, 76, 43, 0.55);
+      border-color: #d5bc86;
+      color: #f0e2c2;
+    }
+    /* 折叠时竖排文字 */
+    .session-collapsed-hint {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      writing-mode: vertical-rl;
+      letter-spacing: 3px;
+      font-size: 11px;
+      color: #ae9b73;
+      cursor: pointer;
+      user-select: none;
+      padding-top: 40px;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.22s, visibility 0.22s;
+    }
+    .session-panel.collapsed .session-collapsed-hint {
+      opacity: 1;
+      visibility: visible;
+    }
+    .session-panel-header {
+      padding: 11px 14px 11px 14px;
+      padding-right: 32px;
       display: flex;
       align-items: center;
       gap: 8px;
+      border-bottom: 1px solid rgba(189, 161, 102, 0.22);
     }
-    .sidebar-header span {
-      color: #fff;
-      font-size: 14px;
-      font-weight: bold;
+    .session-panel-header span {
+      color: #e8d7ad;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
     }
     .new-chat-btn {
-      width: calc(100% - 30px);
-      margin: 0 15px 10px;
-      padding: 10px;
-      background: linear-gradient(135deg, #FFB7C5 0%, #FF9AAF 100%);
-      border: none;
+      width: calc(100% - 24px);
+      margin: 10px 12px 10px;
+      padding: 9px;
+      background: linear-gradient(180deg, #5b4a2d 0%, #46381f 100%);
+      border: 1px solid #bca26a;
       border-radius: 8px;
-      color: white;
-      font-size: 13px;
+      color: #f1e5c7;
+      font-size: 12px;
       cursor: pointer;
       transition: all 0.2s;
+      box-shadow: inset 0 1px 0 rgba(255, 238, 193, 0.25), 0 2px 10px rgba(0, 0, 0, 0.35);
+      white-space: nowrap;
     }
-    .new-chat-btn:hover { opacity: 0.9; transform: scale(1.02); }
+    .new-chat-btn:hover {
+      transform: translateY(-1px);
+      border-color: #d5bc86;
+      background: linear-gradient(180deg, #665434 0%, #4f3f24 100%);
+    }
     .session-list {
       flex: 1;
       overflow-y: auto;
-      padding: 5px;
+      padding: 4px;
+    }
+
+    /* ===== 中间：立绘 + 亲密度（固定不折叠）===== */
+    .character-col {
+      width: 180px;
+      flex-shrink: 0;
+      background: linear-gradient(180deg, rgba(14, 30, 80, 0.97) 0%, rgba(11, 24, 65, 0.99) 100%);
+      border-right: 1px solid rgba(189, 161, 102, 0.45);
+      box-shadow: inset -1px 0 0 rgba(255, 221, 151, 0.1);
+      display: flex;
+      flex-direction: column;
+    }
+    .character-panel {
+      flex: 1;
+      margin: 10px 10px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(189, 161, 102, 0.45);
+      background: linear-gradient(180deg, rgba(16, 32, 79, 0.7) 0%, rgba(13, 26, 62, 0.82) 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 223, 154, 0.1);
+      min-height: 0;
+    }
+    .character-image {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      filter: saturate(0.92) brightness(0.95);
     }
     .session-item {
       padding: 10px 12px;
       margin: 4px 0;
       border-radius: 8px;
-      color: #ccc;
+      color: #ccb98f;
       font-size: 13px;
       cursor: pointer;
       display: flex;
@@ -63,8 +177,15 @@
       transition: all 0.15s;
       position: relative;
     }
-    .session-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
-    .session-item.active { background: rgba(255,183,197,0.3); color: #fff; }
+    .session-item:hover {
+      background: rgba(151, 125, 76, 0.2);
+      color: #f0e2c2;
+    }
+    .session-item.active {
+      background: linear-gradient(180deg, rgba(96, 76, 43, 0.55) 0%, rgba(72, 57, 33, 0.48) 100%);
+      color: #f5e7c7;
+      box-shadow: inset 0 0 0 1px rgba(189, 161, 102, 0.45);
+    }
     .session-item .title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .session-item .delete-btn {
       opacity: 0;
@@ -72,8 +193,8 @@
       height: 20px;
       border-radius: 50%;
       border: none;
-      background: rgba(255,100,100,0.8);
-      color: white;
+      background: rgba(119, 46, 46, 0.92);
+      color: #f1d9d9;
       font-size: 12px;
       cursor: pointer;
       transition: opacity 0.2s;
@@ -82,7 +203,7 @@
       justify-content: center;
     }
     .session-item:hover .delete-btn { opacity: 1; }
-    .session-item .delete-btn:hover { background: rgba(255,60,60,1); }
+    .session-item .delete-btn:hover { background: rgba(147, 50, 50, 1); }
     /* 主内容区 */
     .main {
       flex: 1;
@@ -91,40 +212,65 @@
       position: relative;
     }
     .header {
-      background: linear-gradient(135deg, #FFB7C5 0%, #FFC0CB 100%);
-      color: white;
+      background: linear-gradient(180deg, #182e70 0%, #13265f 100%);
+      color: #e8d7ad;
       padding: 12px 20px;
       font-size: 16px;
-      font-weight: bold;
+      font-weight: 600;
       display: flex;
       align-items: center;
       gap: 10px;
       justify-content: space-between;
+      border-bottom: 1px solid rgba(189, 161, 102, 0.55);
+      box-shadow: inset 0 -1px 0 rgba(255, 221, 151, 0.14);
+      -webkit-app-region: drag;
+      user-select: none;
     }
     .header-left { display: flex; align-items: center; gap: 10px; }
+    .close-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid rgba(189, 161, 102, 0.7);
+      background: rgba(120, 40, 40, 0.5);
+      color: #f1d9d9;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      -webkit-app-region: no-drag;
+      line-height: 1;
+    }
+    .close-btn:hover {
+      background: rgba(180, 50, 50, 0.85);
+      border-color: #e08080;
+      transform: scale(1.1);
+    }
     .diary-link-btn {
       padding: 5px 12px;
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.4);
+      background: rgba(84, 67, 39, 0.45);
+      border: 1px solid rgba(189, 161, 102, 0.7);
       border-radius: 15px;
-      color: white;
+      color: #e9dab4;
       font-size: 12px;
       cursor: pointer;
       transition: all 0.2s;
     }
-    .diary-link-btn:hover { background: rgba(255,255,255,0.3); }
-    .header-actions { display: flex; gap: 8px; }
+    .diary-link-btn:hover { background: rgba(105, 83, 49, 0.55); }
+    .header-actions { display: flex; gap: 8px; align-items: center; -webkit-app-region: no-drag; }
     .action-btn {
       padding: 5px 12px;
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.4);
+      background: rgba(84, 67, 39, 0.45);
+      border: 1px solid rgba(189, 161, 102, 0.7);
       border-radius: 15px;
-      color: white;
+      color: #e9dab4;
       font-size: 12px;
       cursor: pointer;
       transition: all 0.2s;
     }
-    .action-btn:hover { background: rgba(255,255,255,0.3); }
+    .action-btn:hover { background: rgba(105, 83, 49, 0.55); }
     .chat-container {
       flex: 1;
       overflow-y: auto;
@@ -132,6 +278,9 @@
       display: flex;
       flex-direction: column;
       gap: 15px;
+      background:
+        radial-gradient(circle at 70% 35%, rgba(78, 108, 175, 0.16) 0%, transparent 52%),
+        linear-gradient(180deg, rgba(10, 24, 65, 0.92) 0%, rgba(10, 21, 55, 0.95) 100%);
     }
     .message {
       max-width: 78%;
@@ -143,51 +292,59 @@
       white-space: pre-wrap;
     }
     .message.ai {
-      background: white;
+      background: linear-gradient(180deg, rgba(17, 33, 84, 0.92) 0%, rgba(14, 28, 73, 0.95) 100%);
+      color: #e8ddc2;
       align-self: flex-start;
       border-radius: 18px 18px 18px 4px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+      border: 1px solid rgba(189, 161, 102, 0.48);
+      box-shadow: inset 0 1px 0 rgba(255, 223, 154, 0.11), 0 4px 18px rgba(0,0,0,0.32);
     }
     .message.user {
-      background: linear-gradient(135deg, #FFB7C5 0%, #FF9AAF 100%);
-      color: #333;
+      background: linear-gradient(180deg, #5d4b2c 0%, #45371f 100%);
+      color: #f0e4c7;
       align-self: flex-end;
       border-bottom-right-radius: 4px;
+      border: 1px solid rgba(189, 161, 102, 0.65);
+      box-shadow: inset 0 1px 0 rgba(255, 236, 188, 0.2), 0 4px 16px rgba(0,0,0,0.28);
     }
     .message.loading { opacity: 0.6; font-style: italic; }
     .welcome {
       text-align: center;
-      color: #999;
+      color: #c7b58f;
       padding: 40px 20px;
     }
     .welcome .emoji { font-size: 48px; margin-bottom: 15px; }
     .mood-area {
       padding: 10px 15px;
-      background: white;
-      border-top: 1px solid #eee;
+      background: linear-gradient(180deg, #112760 0%, #0f2358 100%);
+      border-top: 1px solid rgba(189, 161, 102, 0.45);
       display: flex;
       align-items: center;
       gap: 15px;
     }
-    .mood-area-label { font-size: 12px; color: #999; white-space: nowrap; }
+    .mood-area-label { font-size: 12px; color: #ccb98f; white-space: nowrap; }
     .mood-buttons { display: flex; gap: 10px; }
     .mood-btn {
       width: 36px; height: 36px;
       border-radius: 50%;
-      border: 2px solid #ddd;
-      background: #f9f9f9;
+      border: 1px solid rgba(189, 161, 102, 0.7);
+      background: linear-gradient(180deg, #1a347e 0%, #152c69 100%);
       font-size: 18px;
       cursor: pointer;
       transition: all 0.15s;
     }
-    .mood-btn:hover { transform: scale(1.15); border-color: #FFB7C5; background: #fff0f5; }
+    .mood-btn:hover {
+      transform: scale(1.08);
+      border-color: #d8c18d;
+      background: linear-gradient(180deg, #204194 0%, #183579 100%);
+    }
     .mood-btn:active { transform: scale(0.95); }
     .mood-toast {
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(0,0,0,0.85);
-      color: white;
+      background: linear-gradient(180deg, rgba(24, 46, 111, 0.96) 0%, rgba(18, 36, 88, 0.96) 100%);
+      color: #efe4c7;
       padding: 12px 24px;
       border-radius: 20px;
       font-size: 15px;
@@ -196,50 +353,61 @@
       pointer-events: none;
       z-index: 10;
       white-space: nowrap;
+      border: 1px solid rgba(189, 161, 102, 0.7);
     }
     .mood-toast.show { opacity: 1; }
     .input-area {
       padding: 15px;
-      background: white;
-      border-top: 1px solid #eee;
+      background: linear-gradient(180deg, #112760 0%, #0d2156 100%);
+      border-top: 1px solid rgba(189, 161, 102, 0.45);
       display: flex;
       gap: 10px;
     }
     .input-area input {
       flex: 1;
       padding: 12px 16px;
-      border: 1px solid #ddd;
+      border: 1px solid rgba(189, 161, 102, 0.55);
       border-radius: 25px;
       font-size: 14px;
       outline: none;
+      color: #f2e7cb;
+      background: linear-gradient(180deg, #0d1f52 0%, #0c1a44 100%);
     }
-    .input-area input:focus { border-color: #FFB7C5; }
+    .input-area input::placeholder { color: rgba(211, 190, 145, 0.72); }
+    .input-area input:focus {
+      border-color: #d8c18d;
+      box-shadow: 0 0 0 2px rgba(186, 160, 101, 0.2);
+    }
     .send-btn {
       padding: 12px 20px;
-      background: linear-gradient(135deg, #FFB7C5 0%, #FFC0CB 100%);
-      border: none;
+      background: linear-gradient(180deg, #5d4b2c 0%, #45371f 100%);
+      border: 1px solid #bca26a;
       border-radius: 25px;
-      color: white;
-      font-weight: bold;
+      color: #f2e7c9;
+      font-weight: 600;
       cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255, 234, 182, 0.22);
     }
-    .send-btn:hover { opacity: 0.9; }
+    .send-btn:hover {
+      background: linear-gradient(180deg, #6a5533 0%, #4f3f24 100%);
+    }
     .empty-sidebar {
       text-align: center;
-      color: #666;
+      color: #ae9b73;
       padding: 20px;
       font-size: 12px;
     }
     /* ===== 养成系统UI ===== */
     .progression-panel {
       padding: 12px;
-      background: rgba(255,255,255,0.1);
+      background: rgba(12, 28, 72, 0.55);
       border-radius: 10px;
       margin: 10px;
+      border: 1px solid rgba(189, 161, 102, 0.35);
     }
     .progression-title {
       font-size: 12px;
-      color: #fff;
+      color: #e8d7ad;
       margin-bottom: 8px;
       display: flex;
       align-items: center;
@@ -247,10 +415,11 @@
     }
     .progression-bar {
       height: 8px;
-      background: rgba(255,255,255,0.2);
+      background: rgba(5, 14, 40, 0.65);
       border-radius: 4px;
       overflow: hidden;
       margin-bottom: 6px;
+      border: 1px solid rgba(189, 161, 102, 0.35);
     }
     .progression-fill {
       height: 100%;
@@ -261,11 +430,11 @@
       display: flex;
       justify-content: space-between;
       font-size: 11px;
-      color: #ccc;
+      color: #cbb88f;
     }
     .progression-stage {
       font-weight: bold;
-      color: #fff;
+      color: #e8d7ad;
     }
     .progression-points {
       color: #FFB7C5;
@@ -411,14 +580,26 @@
   </style>
 </head>
 <body>
-  <!-- 侧边栏：会话列表 -->
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <span>💬 会话列表</span>
+  <!-- 左：可折叠会话列表 -->
+  <div class="session-panel" id="sessionPanel">
+    <button class="session-toggle" id="sessionToggle" title="折叠/展开">◀</button>
+    <div class="session-collapsed-hint" onclick="toggleSessionPanel()">会话列表</div>
+    <div class="session-panel-content">
+      <div class="session-panel-header">
+        <span>💬 会话列表</span>
+      </div>
+      <button class="new-chat-btn" onclick="createSession()">✨ 新建会话</button>
+      <div class="session-list" id="sessionList">
+        <div class="empty-sidebar">暂无会话</div>
+      </div>
     </div>
-    <button class="new-chat-btn" onclick="createSession()">✨ 新建会话</button>
-    
-    <!-- 养成系统进度条 -->
+  </div>
+
+  <!-- 中：立绘 + 亲密度 -->
+  <div class="character-col">
+    <div class="character-panel">
+      <img class="character-image" src="pet-image.png" alt="立绘">
+    </div>
     <div class="progression-panel" id="progressionPanel">
       <div class="progression-title">💕 好感度</div>
       <div class="progression-bar">
@@ -428,10 +609,6 @@
         <span class="progression-stage" id="progressionStage">初识</span>
         <span class="progression-points" id="progressionPoints">0</span>
       </div>
-    </div>
-    
-    <div class="session-list" id="sessionList">
-      <div class="empty-sidebar">暂无会话</div>
     </div>
   </div>
 
@@ -443,6 +620,7 @@
         <button class="action-btn" onclick="openSettings()">⚙️</button>
         <button class="action-btn" onclick="openDiary()">📖</button>
         <button class="action-btn" onclick="openGame()">🎮</button>
+        <button class="close-btn" onclick="window.close()" title="关闭">✕</button>
       </div>
     </div>
     <div class="mood-toast" id="moodToast"></div>
@@ -1346,6 +1524,27 @@ ${extraContext}
     loadSessions();
     renderMessages();
     messageInput.focus();
+
+    // ===== 会话面板折叠/展开 =====
+    const SESSION_PANEL_KEY = 'session_panel_collapsed';
+    const sessionPanel = document.getElementById('sessionPanel');
+    const sessionToggleBtn = document.getElementById('sessionToggle');
+
+    function toggleSessionPanel() {
+      const collapsed = sessionPanel.classList.toggle('collapsed');
+      sessionToggleBtn.textContent = collapsed ? '▶' : '◀';
+      localStorage.setItem(SESSION_PANEL_KEY, collapsed ? '1' : '0');
+    }
+
+    sessionToggleBtn.addEventListener('click', toggleSessionPanel);
+
+    // 恢复上次状态（默认展开）
+    if (localStorage.getItem(SESSION_PANEL_KEY) === '1') {
+      sessionPanel.classList.add('collapsed');
+      sessionToggleBtn.textContent = '▶';
+    } else {
+      sessionToggleBtn.textContent = '◀';
+    }
   </script>
 </body>
 </html>

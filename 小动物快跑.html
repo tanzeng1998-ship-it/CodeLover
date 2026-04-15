@@ -15,22 +15,63 @@
             -webkit-tap-highlight-color: transparent;
         }
         body {
-            background: linear-gradient(135deg, #a8e6cf 0%, #88d8b0 50%, #7fcdbb 100%);
+            background: linear-gradient(180deg, #0a0d14 0%, #0d1120 100%);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding-top: 20px;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding-top: 0;
             font-family: 'Fredoka One', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
             font-weight: 700;
             overflow: auto;
+        }
+        #titlebar {
+            width: 100%;
+            height: 36px;
+            background: linear-gradient(135deg, #1a2a5e 0%, #14204d 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            -webkit-app-region: drag;
+            flex-shrink: 0;
+            border-bottom: 1px solid rgba(189,161,102,0.45);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+        }
+        #titlebar span {
+            font-size: 13px;
+            font-weight: 600;
+            color: #e8d7ad;
+            letter-spacing: 0.5px;
+        }
+        #titlebar button {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 1px solid rgba(189,161,102,0.6);
+            background: rgba(120,40,40,0.5);
+            color: #f1d9d9;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            -webkit-app-region: no-drag;
+            line-height: 1;
+        }
+        #titlebar button:hover {
+            background: rgba(180,50,50,0.85);
+            border-color: #e08080;
+            transform: scale(1.1);
         }
         #gameContainer {
             position: relative;
             width: 100%;
             max-width: 1200px;
             aspect-ratio: 16/9;
-            max-height: calc(100vh - 40px);
+            max-height: calc(100vh - 36px);
             background: #fff;
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.2);
@@ -670,6 +711,10 @@
     </style>
 </head>
 <body>
+    <div id="titlebar">
+        <span>🎮 小动物，快跑！</span>
+        <button id="closeBtn">✕</button>
+    </div>
     <div id="gameContainer">
         <canvas id="gameCanvas"></canvas>
         <!-- 道具栏独立于 uiOverlay，避免 pointer-events 干扰 -->
@@ -3796,6 +3841,11 @@
             requestAnimationFrame(renderMenuBackground);
         }
         renderMenuBackground();
+
+        document.getElementById('closeBtn').addEventListener('click', () => {
+            const { ipcRenderer } = require('electron');
+            ipcRenderer.send('close-game');
+        });
     </script>
 </body>
 </html>

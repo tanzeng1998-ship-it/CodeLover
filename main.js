@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, getCurrentWindow } = require('electron');
 const path = require('path');
 
 let win;
@@ -48,7 +48,7 @@ function createDiaryWindow() {
   diaryWin = new BrowserWindow({
     width: 380,
     height: 560,
-    frame: true,
+    frame: false,
     transparent: false,
     alwaysOnTop: false,
     resizable: true,
@@ -69,6 +69,9 @@ function createDiaryWindow() {
 function createChatWindow() {
   if (chatWin && !chatWin.isDestroyed()) {
     chatWin.focus();
+    if (win && !win.isDestroyed()) {
+      win.hide();
+    }
     return;
   }
   const { screen } = require('electron');
@@ -77,7 +80,7 @@ function createChatWindow() {
   chatWin = new BrowserWindow({
     width: 660,
     height: 640,
-    frame: true,
+    frame: false,
     transparent: false,
     alwaysOnTop: false,
     resizable: true,
@@ -92,7 +95,15 @@ function createChatWindow() {
 
   chatWin.setMenuBarVisibility(false);
   chatWin.loadFile('chat.html');
-  chatWin.on('closed', () => { chatWin = null; });
+  if (win && !win.isDestroyed()) {
+    win.hide();
+  }
+  chatWin.on('closed', () => {
+    chatWin = null;
+    if (win && !win.isDestroyed()) {
+      win.show();
+    }
+  });
 }
 
 function createGameWindow() {
@@ -106,7 +117,7 @@ function createGameWindow() {
   gameWin = new BrowserWindow({
     width: 800,
     height: 600,
-    frame: true,
+    frame: false,
     transparent: false,
     alwaysOnTop: false,
     resizable: true,
@@ -179,6 +190,17 @@ ipcMain.on('open-settings', () => {
   createSettingsWindow();
 });
 
+// 关闭子窗口
+ipcMain.on('close-diary', () => {
+  if (diaryWin && !diaryWin.isDestroyed()) diaryWin.close();
+});
+ipcMain.on('close-settings', () => {
+  if (settingsWin && !settingsWin.isDestroyed()) settingsWin.close();
+});
+ipcMain.on('close-game', () => {
+  if (gameWin && !gameWin.isDestroyed()) gameWin.close();
+});
+
 function createSettingsWindow() {
   if (settingsWin && !settingsWin.isDestroyed()) {
     settingsWin.focus();
@@ -190,7 +212,7 @@ function createSettingsWindow() {
   settingsWin = new BrowserWindow({
     width: 360,
     height: 480,
-    frame: true,
+    frame: false,
     transparent: false,
     alwaysOnTop: false,
     resizable: false,

@@ -10,16 +10,61 @@
       padding: 0;
       box-sizing: border-box;
     }
+    ::-webkit-scrollbar { display: none; }
+    * { scrollbar-width: none; -ms-overflow-style: none; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(180deg, #fef9f9 0%, #fff5f7 100%);
+      background: linear-gradient(180deg, #0a0d14 0%, #0d1120 60%, #0a0e1a 100%);
       min-height: 100vh;
-      color: #333;
+      color: #e8d7ad;
+    }
+
+    .titlebar {
+      background: linear-gradient(135deg, #1a2a5e 0%, #14204d 100%);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      -webkit-app-region: drag;
+      border-bottom: 1px solid rgba(189,161,102,0.45);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .titlebar-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e8d7ad;
+      letter-spacing: 0.3px;
+    }
+
+    .titlebar-close {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid rgba(189,161,102,0.6);
+      background: rgba(120,40,40,0.5);
+      color: #f1d9d9;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      -webkit-app-region: no-drag;
+      line-height: 1;
+    }
+    .titlebar-close:hover {
+      background: rgba(180,50,50,0.85);
+      border-color: #e08080;
+      transform: scale(1.1);
     }
 
     .container {
-      padding: 24px;
+      padding: 20px 24px 24px;
       max-width: 320px;
       margin: 0 auto;
     }
@@ -31,7 +76,7 @@
 
     .header h1 {
       font-size: 22px;
-      color: #2a2a3e;
+      color: #e8d7ad;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -40,22 +85,23 @@
 
     .header p {
       font-size: 13px;
-      color: #888;
+      color: #7a6a4a;
       margin-top: 6px;
     }
 
     .card {
-      background: white;
+      background: linear-gradient(180deg, rgba(20,32,75,0.9) 0%, rgba(15,25,60,0.95) 100%);
       border-radius: 16px;
       padding: 20px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      border: 1px solid rgba(189,161,102,0.3);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,223,154,0.08);
       margin-bottom: 16px;
     }
 
     .card-title {
       font-size: 14px;
       font-weight: 600;
-      color: #2a2a3e;
+      color: #e8d7ad;
       margin-bottom: 16px;
       display: flex;
       align-items: center;
@@ -73,7 +119,7 @@
     .form-group label {
       display: block;
       font-size: 13px;
-      color: #666;
+      color: #9a8a6a;
       margin-bottom: 6px;
     }
 
@@ -82,19 +128,30 @@
     .form-group textarea {
       width: 100%;
       padding: 10px 12px;
-      border: 1.5px solid #e8e8e8;
+      border: 1px solid rgba(189,161,102,0.3);
       border-radius: 10px;
       font-size: 14px;
-      transition: border-color 0.2s;
-      background: #fafafa;
+      transition: border-color 0.2s, background 0.2s;
+      background: rgba(10,16,40,0.8);
+      color: #e8d7ad;
     }
 
     .form-group input:focus,
     .form-group select:focus,
     .form-group textarea:focus {
       outline: none;
-      border-color: #FFB7C5;
-      background: white;
+      border-color: #c9a84c;
+      background: rgba(14,22,55,0.9);
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: rgba(180,155,100,0.45);
+    }
+
+    .form-group select option {
+      background: #0d1120;
+      color: #e8d7ad;
     }
 
     .form-group textarea {
@@ -109,20 +166,22 @@
     .btn-save {
       width: 100%;
       padding: 14px;
-      background: linear-gradient(135deg, #FFB7C5 0%, #FF9AAF 100%);
-      border: none;
+      background: linear-gradient(135deg, #5b4a2d 0%, #46381f 100%);
+      border: 1px solid #bca26a;
       border-radius: 12px;
-      color: white;
+      color: #f1e5c7;
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(255,154,175,0.4);
+      box-shadow: inset 0 1px 0 rgba(255,238,193,0.2), 0 4px 14px rgba(0,0,0,0.4);
     }
 
     .btn-save:hover {
       transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(255,154,175,0.5);
+      border-color: #d5bc86;
+      background: linear-gradient(135deg, #665434 0%, #4f3f24 100%);
+      box-shadow: inset 0 1px 0 rgba(255,238,193,0.25), 0 6px 18px rgba(0,0,0,0.45);
     }
 
     .btn-save:active {
@@ -130,8 +189,9 @@
     }
 
     .btn-save.saved {
-      background: linear-gradient(135deg, #81C784 0%, #66BB6A 100%);
-      box-shadow: 0 4px 12px rgba(102,187,106,0.4);
+      background: linear-gradient(135deg, #2a4a2a 0%, #1e3a1e 100%);
+      border-color: #6a9a6a;
+      box-shadow: inset 0 1px 0 rgba(150,220,150,0.15), 0 4px 14px rgba(0,0,0,0.4);
     }
 
     .toast {
@@ -139,8 +199,9 @@
       top: 20px;
       left: 50%;
       transform: translateX(-50%) translateY(-20px);
-      background: rgba(50,50,50,0.9);
-      color: white;
+      background: linear-gradient(180deg, rgba(24,38,90,0.97) 0%, rgba(18,30,72,0.97) 100%);
+      border: 1px solid rgba(189,161,102,0.5);
+      color: #e8d7ad;
       padding: 10px 20px;
       border-radius: 20px;
       font-size: 13px;
@@ -158,7 +219,8 @@
       width: 60px;
       height: 60px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #FFB7C5 0%, #FF9AAF 100%);
+      background: linear-gradient(135deg, #5b4a2d 0%, #46381f 100%);
+      border: 1px solid #bca26a;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -168,12 +230,16 @@
 
     .constellation-hint {
       font-size: 11px;
-      color: #999;
+      color: #7a6a4a;
       margin-top: 4px;
     }
   </style>
 </head>
 <body>
+  <div class="titlebar">
+    <span class="titlebar-title">⚙️ 个人设置</span>
+    <button class="titlebar-close" id="closeBtn">✕</button>
+  </div>
   <div class="container">
     <div class="header">
       <h1>⚙️ 个人设置</h1>
@@ -331,6 +397,12 @@
 
     // 初始化
     loadProfile();
+
+    // 关闭窗口
+    document.getElementById('closeBtn').addEventListener('click', () => {
+      const { ipcRenderer } = require('electron');
+      ipcRenderer.send('close-settings');
+    });
   </script>
 </body>
 </html>
