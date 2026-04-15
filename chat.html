@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>恋人代码</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+    /* 侧边栏 */
+    .sidebar {
+      width: 160px;
+      background: linear-gradient(180deg, #2a2a3e 0%, #1a1a2e 100%);
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #3a3a4e;
+    }
+    .sidebar-header {
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sidebar-header span {
+      color: #fff;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .new-chat-btn {
+      width: calc(100% - 30px);
+      margin: 0 15px 10px;
+      padding: 10px;
+      background: linear-gradient(135deg, #FFB7C5 0%, #FF9AAF 100%);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .new-chat-btn:hover { opacity: 0.9; transform: scale(1.02); }
+    .session-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 5px;
+    }
+    .session-item {
+      padding: 10px 12px;
+      margin: 4px 0;
+      border-radius: 8px;
+      color: #ccc;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .session-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .session-item.active { background: rgba(255,183,197,0.3); color: #fff; }
+    .session-item .title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .session-item .delete-btn {
+      opacity: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,100,100,0.8);
+      color: white;
+      font-size: 12px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .session-item:hover .delete-btn { opacity: 1; }
+    .session-item .delete-btn:hover { background: rgba(255,60,60,1); }
+    /* 主内容区 */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .header {
+      background: linear-gradient(135deg, #FFB7C5 0%, #FFC0CB 100%);
+      color: white;
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: space-between;
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .diary-link-btn {
+      padding: 5px 12px;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 15px;
+      color: white;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .diary-link-btn:hover { background: rgba(255,255,255,0.3); }
+    .header-actions { display: flex; gap: 8px; }
+    .action-btn {
+      padding: 5px 12px;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 15px;
+      color: white;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .action-btn:hover { background: rgba(255,255,255,0.3); }
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .message {
+      max-width: 78%;
+      padding: 10px 16px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.6;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    .message.ai {
+      background: white;
+      align-self: flex-start;
+      border-radius: 18px 18px 18px 4px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    }
+    .message.user {
+      background: linear-gradient(135deg, #FFB7C5 0%, #FF9AAF 100%);
+      color: #333;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .message.loading { opacity: 0.6; font-style: italic; }
+    .welcome {
+      text-align: center;
+      color: #999;
+      padding: 40px 20px;
+    }
+    .welcome .emoji { font-size: 48px; margin-bottom: 15px; }
+    .mood-area {
+      padding: 10px 15px;
+      background: white;
+      border-top: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .mood-area-label { font-size: 12px; color: #999; white-space: nowrap; }
+    .mood-buttons { display: flex; gap: 10px; }
+    .mood-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 2px solid #ddd;
+      background: #f9f9f9;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .mood-btn:hover { transform: scale(1.15); border-color: #FFB7C5; background: #fff0f5; }
+    .mood-btn:active { transform: scale(0.95); }
+    .mood-toast {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.85);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 20px;
+      font-size: 15px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 10;
+      white-space: nowrap;
+    }
+    .mood-toast.show { opacity: 1; }
+    .input-area {
+      padding: 15px;
+      background: white;
+      border-top: 1px solid #eee;
+      display: flex;
+      gap: 10px;
+    }
+    .input-area input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 25px;
+      font-size: 14px;
+      outline: none;
+    }
+    .input-area input:focus { border-color: #FFB7C5; }
+    .send-btn {
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #FFB7C5 0%, #FFC0CB 100%);
+      border: none;
+      border-radius: 25px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .send-btn:hover { opacity: 0.9; }
+    .empty-sidebar {
+      text-align: center;
+      color: #666;
+      padding: 20px;
+      font-size: 12px;
+    }
+    /* ===== 养成系统UI ===== */
+    .progression-panel {
+      padding: 12px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      margin: 10px;
+    }
+    .progression-title {
+      font-size: 12px;
+      color: #fff;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .progression-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .progression-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease, background-color 0.3s;
+    }
+    .progression-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #ccc;
+    }
+    .progression-stage {
+      font-weight: bold;
+      color: #fff;
+    }
+    .progression-points {
+      color: #FFB7C5;
+    }
+    .stage-up-toast {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+      color: #333;
+      padding: 20px 40px;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1000;
+      box-shadow: 0 8px 32px rgba(255,215,0,0.5);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .stage-up-toast.show {
+      opacity: 1;
+      animation: stageUpPop 0.5s ease-out;
+    }
+    .stage-up-toast .sub {
+      font-size: 13px;
+      color: #666;
+      margin-top: 5px;
+      font-weight: normal;
+    }
+    @keyframes stageUpPop {
+      0% { transform: translate(-50%, -50%) scale(0.5); }
+      50% { transform: translate(-50%, -50%) scale(1.1); }
+      100% { transform: translate(-50%, -50%) scale(1); }
+    }
+    .affection-toast {
+      position: fixed;
+      top: 60px; right: 20px;
+      background: linear-gradient(135deg, #FFD6E0 0%, #FFC4D6 100%);
+      color: #333;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .affection-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* 好感度下降 toast */
+    .penalty-toast {
+      position: fixed;
+      top: 60px; right: 20px;
+      background: linear-gradient(135deg, #B0BEC5 0%, #90A4AE 100%);
+      color: #333;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .penalty-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* 阶段下降 toast */
+    .stage-down-toast {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.5);
+      background: linear-gradient(135deg, #78909C 0%, #546E7A 100%);
+      color: #fff;
+      padding: 20px 40px;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1000;
+      box-shadow: 0 8px 32px rgba(84,110,122,0.5);
+      transition: opacity 0.4s, transform 0.4s;
+    }
+    .stage-down-toast.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .stage-down-toast .sub {
+      font-size: 13px;
+      color: rgba(255,255,255,0.8);
+      margin-top: 5px;
+      font-weight: normal;
+    }
+    /* 分手 toast */
+    .breakup-toast {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s;
+    }
+    .breakup-toast.show {
+      opacity: 1;
+    }
+    .breakup-toast .content {
+      background: linear-gradient(135deg, #37474F 0%, #263238 100%);
+      color: #fff;
+      padding: 30px 50px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      transform: scale(0.8);
+      transition: transform 0.4s;
+    }
+    .breakup-toast.show .content {
+      transform: scale(1);
+    }
+    .breakup-toast .icon { font-size: 40px; margin-bottom: 10px; }
+    .breakup-toast .title { font-size: 20px; font-weight: bold; margin-bottom: 8px; }
+    .breakup-toast .sub { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.6; }
+    /* 复合进度标记 */
+    .reconcile-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #90A4AE 0%, #78909C 100%);
+      color: #fff;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <!-- 侧边栏：会话列表 -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <span>💬 会话列表</span>
+    </div>
+    <button class="new-chat-btn" onclick="createSession()">✨ 新建会话</button>
+    
+    <!-- 养成系统进度条 -->
+    <div class="progression-panel" id="progressionPanel">
+      <div class="progression-title">💕 好感度</div>
+      <div class="progression-bar">
+        <div class="progression-fill" id="progressionFill"></div>
+      </div>
+      <div class="progression-info">
+        <span class="progression-stage" id="progressionStage">初识</span>
+        <span class="progression-points" id="progressionPoints">0</span>
+      </div>
+    </div>
+    
+    <div class="session-list" id="sessionList">
+      <div class="empty-sidebar">暂无会话</div>
+    </div>
+  </div>
+
+  <!-- 主对话区 -->
+  <div class="main">
+    <div class="header">
+      <div class="header-left" id="headerLeft"></div>
+      <div class="header-actions">
+        <button class="action-btn" onclick="openSettings()">⚙️</button>
+        <button class="action-btn" onclick="openDiary()">📖</button>
+        <button class="action-btn" onclick="openGame()">🎮</button>
+      </div>
+    </div>
+    <div class="mood-toast" id="moodToast"></div>
+    <div class="stage-up-toast" id="stageUpToast">
+      <div id="stageUpText"></div>
+      <div class="sub" id="stageUpSub"></div>
+    </div>
+    <div class="affection-toast" id="affectionToast"></div>
+    <div class="penalty-toast" id="penaltyToast"></div>
+    <div class="stage-down-toast" id="stageDownToast">
+      <div id="stageDownText"></div>
+      <div class="sub" id="stageDownSub"></div>
+    </div>
+    <div class="breakup-toast" id="breakupToast">
+      <div class="content">
+        <div class="icon">💔</div>
+        <div class="title" id="breakupTitle"></div>
+        <div class="sub" id="breakupSub"></div>
+      </div>
+    </div>
+    <div class="chat-container" id="chatContainer">
+      <div class="welcome">
+        <div class="emoji">👋</div>
+       
+        <p style="margin-top: 10px; font-size: 12px;">选择一个会话或新建会话来开始聊天吧~</p>
+      </div>
+    </div>
+    <div class="mood-area">
+      <span class="mood-area-label">记录心情：</span>
+      <div class="mood-buttons">
+        <button class="mood-btn" data-mood="happy" title="开心">😊</button>
+        <button class="mood-btn" data-mood="neutral" title="平和">😐</button>
+        <button class="mood-btn" data-mood="sad" title="不开心">😭</button>
+      </div>
+    </div>
+    <div class="input-area">
+      <input type="text" id="messageInput" placeholder="输入消息..." onkeypress="handleKeyPress(event)">
+      <button class="send-btn" onclick="sendMessage()">发送</button>
+    </div>
+  </div>
+
+  <script>
+    // 引入养成系统
+    const {
+      addAffection, getProgression, getCurrentStage, getStageProgress,
+      addHiddenAffection, addMemory, getMemory, checkMoodKeywords,
+      applyPenalty, getMoodModifier, isReconciling, getReconciliationContext
+    } = (function() {
+      const PROGRESSION_KEY = 'monkey_progression';
+      const STAGES = [
+        { id: 1, name: '初识', min: 0, max: 100, color: '#E8E8E8' },
+        { id: 2, name: '熟悉', min: 101, max: 300, color: '#B8D4E8' },
+        { id: 3, name: '暧昧', min: 301, max: 600, color: '#FFB7C5' },
+        { id: 4, name: '交往', min: 601, max: 1000, color: '#FF9AAF' },
+        { id: 5, name: '结婚', min: 1001, max: 2000, color: '#FFD700' },
+        { id: 6, name: '白头偕老', min: 2001, max: Infinity, color: '#FF69B4' }
+      ];
+      const ACTIONS = {
+        firstChat: { stage: 1, points: 5, msg: '今日初见~', type: 'daily' },
+        chat: { stage: 2, points: 10, msg: '和你聊天很开心' },
+        nightGreeting: { stage: 3, points: 15, msg: '被惦记着真好' },
+        expressMiss: { stage: 3, points: 20, msg: '...我也是' },
+        playGame: { stage: 3, points: 25, msg: '和你一起很开心' },
+        date: { stage: 4, points: 30, msg: '今天的约会很开心' },
+        anniversary: { stage: 4, points: 40, msg: '重要的一天' },
+        weddingAnniversary: { stage: 5, points: 50, msg: '又一年了呢' },
+        dailyTogether: { stage: 5, points: 15, msg: '平凡的每一天' },
+        dailyStay: { stage: 6, points: 10, msg: '有你在真好', type: 'daily' },
+        // 二次复合路线专属
+        reconcileChat: { stage: 1, points: 3, msg: '谢谢你还在...' },
+        reconcileApologize: { stage: 1, points: 8, msg: '我愿意重新认识你' }
+      };
+
+      // ========== 关键词惩罚配置 ==========
+      // extreme: 直接归零，进入二次复合
+      // heavy: 大幅扣分，可能导致阶段回退
+      // medium: 中度扣分
+      // light: 轻微扣分，仅情感波动
+      const MOOD_KEYWORDS = {
+        extreme: {
+          keywords: ['离婚', '分手', '散了吧', '别联系了', '拉黑', '删除', '结束了', '一刀两断', '再见了', '永别', '不爱你了', '不爱了', '不要再见了', '算了吧', '到此为止', '形同陌路', '各走各的', '我们完了', 'game over'],
+          penalty: 0, // 直接归零
+          aiMsg: '...好。如果这是你的决定。'
+        },
+        heavy: {
+          keywords: ['不想理你', '烦死了', '讨厌你', '滚', '别烦我', '够了', '离我远点', '受够了', '忍够了', '不想和你说话', '别碰我', '不要你了', '后悔认识你', '别出现在我面前'],
+          penalty: -80,
+          aiMsg: '...好。我安静一点。'
+        },
+        medium: {
+          keywords: ['生气', '不高兴', '不开心', '不爽', '生气了', '你太过分了', '你变了', '失望', '没意思', '心寒', '不在乎我', '不关心我', '冷暴力', '忽视我', '敷衍我'],
+          penalty: -30,
+          aiMsg: '...对不起。是我哪里做得不好吗？'
+        },
+        light: {
+          keywords: ['哼', '烦', '无聊', '无语', '算了', '不想说', '随便吧', '你猜', '不理你了', '赌气', '小气', '笨蛋', '傻瓜', '讨厌'],
+          penalty: -10,
+          aiMsg: '...嗯。'
+        }
+      };
+
+      // ========== 记忆系统 ==========
+      function addMemory(key, value) {
+        const p = getProgression();
+        if (!p.memory) p.memory = [];
+        // 同 key 覆盖旧记忆
+        p.memory = p.memory.filter(m => m.key !== key);
+        p.memory.push({ key, value, timestamp: Date.now() });
+        // 最多保留 50 条
+        if (p.memory.length > 50) p.memory = p.memory.slice(-50);
+        saveProgression(p);
+      }
+
+      function getMemory(key) {
+        const p = getProgression();
+        if (!p.memory) return null;
+        return p.memory.find(m => m.key === key) || null;
+      }
+
+      // ========== 初始化 / 读写 ==========
+      function getProgression() {
+        const data = localStorage.getItem(PROGRESSION_KEY);
+        if (data) return JSON.parse(data);
+        return {
+          affection: 0, stage: 1, lastInteraction: Date.now(),
+          lastDailyBonus: null, memory: [], stageHistory: [{ stage: 1, date: new Date().toISOString() }],
+          breakupCount: 0, breakups: [], isReconciling: false
+        };
+      }
+
+      function saveProgression(p) { localStorage.setItem(PROGRESSION_KEY, JSON.stringify(p)); }
+
+      function getCurrentStage(affection) {
+        for (let i = STAGES.length - 1; i >= 0; i--) {
+          if (affection >= STAGES[i].min) return STAGES[i];
+        }
+        return STAGES[0];
+      }
+
+      function getStageProgress(affection) {
+        const stage = getCurrentStage(affection);
+        if (stage.max === Infinity) return Math.min(100, Math.round(((affection - stage.min) / 500) * 100));
+        return Math.min(100, Math.max(0, Math.round(((affection - stage.min) / (stage.max - stage.min)) * 100)));
+      }
+
+      // ========== 好感度增减 ==========
+      function addAffection(action) {
+        const cfg = ACTIONS[action];
+        if (!cfg) return null;
+        const p = getProgression();
+        const currentStage = getCurrentStage(p.affection);
+
+        if (cfg.type === 'daily') {
+          const today = new Date().toDateString();
+          if (p.lastDailyBonus === today) return null;
+          p.lastDailyBonus = today;
+        }
+
+        // 二次复合期间好感度获取减半
+        let points = cfg.points;
+        if (p.isReconciling) points = Math.max(1, Math.floor(points * 0.5));
+
+        const oldStage = currentStage.id;
+        p.affection = Math.max(0, p.affection + points);
+        p.lastInteraction = Date.now();
+        const newStage = getCurrentStage(p.affection);
+        p.stage = newStage.id;
+
+        // 阶段变更记录
+        if (newStage.id !== oldStage) {
+          if (!p.stageHistory) p.stageHistory = [];
+          p.stageHistory.push({ stage: newStage.id, date: new Date().toISOString() });
+        }
+        // 检测是否完成复合（重新回到分手前的阶段）
+        if (p.isReconciling && p.breakups && p.breakups.length > 0) {
+          const lastBreakup = p.breakups[p.breakups.length - 1];
+          if (lastBreakup.fromStage && newStage.id >= lastBreakup.fromStage) {
+            p.isReconciling = false;
+            addMemory('lastReconcile', { date: new Date().toISOString(), fromStage: lastBreakup.fromStage });
+          }
+        }
+
+        saveProgression(p);
+        const stageUp = newStage.id > oldStage;
+        const stageDown = newStage.id < oldStage;
+        if (stageUp) p.lastStageUp = Date.now();
+        return { points, message: cfg.msg, stageUp, stageDown, newStage, oldStageName: STAGES[oldStage - 1].name };
+      }
+
+      function addHiddenAffection(points, msg) {
+        const p = getProgression();
+        p.affection = Math.max(0, p.affection + points);
+        p.lastInteraction = Date.now();
+        p.stage = getCurrentStage(p.affection).id;
+        saveProgression(p);
+        return { points, message: msg };
+      }
+
+      // ========== 关键词检测 ==========
+      // 返回: null | { level, penalty, aiMsg, matchedKeyword, isExtreme }
+      function checkMoodKeywords(text) {
+        const lower = text.toLowerCase();
+        for (const [level, config] of Object.entries(MOOD_KEYWORDS)) {
+          for (const kw of config.keywords) {
+            if (lower.includes(kw.toLowerCase())) {
+              return {
+                level,
+                penalty: config.penalty,
+                aiMsg: config.aiMsg,
+                matchedKeyword: kw,
+                isExtreme: level === 'extreme'
+              };
+            }
+          }
+        }
+        return null;
+      }
+
+      // 应用惩罚，返回结果
+      function applyPenalty(result) {
+        const p = getProgression();
+        const oldStage = getCurrentStage(p.affection);
+        const oldStageId = oldStage.id;
+
+        if (result.isExtreme) {
+          // 极端情况：好感度归零，进入二次复合
+          if (!p.breakups) p.breakups = [];
+          if (!p.breakupCount) p.breakupCount = 0;
+          p.breakups.push({
+            date: new Date().toISOString(),
+            fromStage: oldStageId,
+            fromAffection: p.affection,
+            trigger: result.matchedKeyword
+          });
+          p.breakupCount++;
+          p.affection = 0;
+          p.isReconciling = true;
+          p.stage = 1;
+          if (!p.stageHistory) p.stageHistory = [];
+          p.stageHistory.push({ stage: 1, date: new Date().toISOString(), event: 'breakup', trigger: result.matchedKeyword });
+        } else {
+          p.affection = Math.max(0, p.affection + result.penalty);
+          const newStage = getCurrentStage(p.affection);
+          p.stage = newStage.id;
+          if (newStage.id < oldStageId) {
+            if (!p.stageHistory) p.stageHistory = [];
+            p.stageHistory.push({ stage: newStage.id, date: new Date().toISOString(), event: 'stage_down', trigger: result.matchedKeyword });
+          }
+        }
+
+        p.lastInteraction = Date.now();
+        saveProgression(p);
+
+        const newStage = getCurrentStage(p.affection);
+        return {
+          oldStageName: oldStage.name,
+          newStage: newStage,
+          newStageName: newStage.name,
+          stageDown: newStage.id < oldStageId,
+          isExtreme: result.isExtreme,
+          penalty: result.isExtreme ? p.affection : result.penalty, // 0 for extreme
+          aiMsg: result.aiMsg,
+          matchedKeyword: result.matchedKeyword,
+          breakupCount: p.breakupCount || 0
+        };
+      }
+
+      // 二次复合期间的好感度获取倍率（0.5x）
+      function getMoodModifier() {
+        const p = getProgression();
+        return p.isReconciling ? 0.5 : 1.0;
+      }
+
+      // 判断是否在二次复合中
+      function isReconciling() {
+        const p = getProgression();
+        return !!p.isReconciling;
+      }
+
+      // 获取二次复合上下文（用于注入 AI prompt）
+      function getReconciliationContext() {
+        const p = getProgression();
+        if (!p.isReconciling || !p.breakups || p.breakups.length === 0) return null;
+        const last = p.breakups[p.breakups.length - 1];
+        const fromStageName = STAGES[last.fromStage - 1] ? STAGES[last.fromStage - 1].name : '未知';
+        return {
+          breakupDate: last.date,
+          fromStage: last.fromStage,
+          fromStageName,
+          trigger: last.trigger,
+          breakupCount: p.breakupCount || 0,
+          currentAffection: p.affection
+        };
+      }
+
+      return {
+        addAffection, getProgression, getCurrentStage, getStageProgress,
+        addHiddenAffection, addMemory, getMemory, checkMoodKeywords,
+        getMoodModifier, isReconciling, getReconciliationContext, applyPenalty
+      };
+    })();
+
+    // 根据阶段返回不同的 prompt 边界（含二次复合特殊处理）
+    function getStagePrompt(stage, aiName) {
+      // 二次复合特殊处理
+      if (isReconciling()) {
+        const ctx = getReconciliationContext();
+        const countText = ctx.breakupCount > 1
+          ? `（这是你们第${ctx.breakupCount}次分手后的重新接触）`
+          : '';
+        return `【当前状态：分手后重新接触${countText}】
+你和用户曾经非常亲密（${ctx.fromStageName}阶段），但因为"${ctx.trigger}"的原因分手了。
+现在用户重新回来找你，你们从陌生人重新开始。
+- 称呼用户：回到礼貌称呼，可以叫名字或"你"，偶尔流露出一丝复杂的情绪
+- 回复风格：克制、带着淡淡的伤感，但内心还在动摇。不会主动提起过去，但如果用户提起，会沉默或简短回应
+- 禁止行为：不能立刻回到亲密状态，不能假装什么都没发生过，不能讨好和卑微
+- 情感内核：你还在意，但被伤到了。你需要慢慢确认对方的真心，才愿意重新打开心扉
+- 复合进度：当前好感度${ctx.currentAffection}，回到${ctx.fromStageName}阶段才算真正复合`;
+      }
+
+      const prompts = {
+        1: `【当前阶段：初识】
+你和用户刚刚认识，关系处于初始阶段。请保持礼貌但温暖的距离感。
+- 称呼用户：直接叫名字或"你"
+- 回复风格：简洁克制，保持适当距离
+- 禁止行为：不能有亲密称呼、暧昧表达、肢体暗示、过于热情的表达
+- 重点：展现礼貌和初步的友好感，让对话自然轻松`,
+        
+        2: `【当前阶段：熟悉】
+你和用户的关系正在加深，开始了解彼此。请展现出愿意深入交流的态度。
+- 称呼用户：可以开始用昵称或简称
+- 回复风格：话题逐渐打开，可以分享更多个人想法
+- 禁止行为：避免过于亲密的称呼和暧昧表达
+- 重点：建立信任感，展现真实的自己，记住用户说过的内容`,
+        
+        3: `【当前阶段：暧昧】
+你和用户之间有了微妙的心动感，关系正在试探性推进。请展现出心动但克制的一面。
+- 称呼用户：可以使用"亲爱的"、"宝贝"等亲密称呼（如果用户主动或同意）
+- 回复风格：可以有些心动暗示，但保持分寸
+- 允许行为：轻微的关心暗示、小心思的表达、适度的想念
+- 禁止行为：不能直接表白、不能有明确的亲密动作描写`,
+        
+        4: `【当前阶段：交往】
+你和用户正式确立了恋爱关系。请以恋人的身份进行对话。
+- 称呼用户：使用恋人之间的亲密称呼
+- 回复风格：甜蜜但不失 ${aiName} 的稳重本色
+- 允许行为：恋人之间的关心、撒娇、小争吵后的和好
+- 禁止行为：过于油腻的表达`,
+        
+        5: `【当前阶段：结婚】
+你和用户已经是夫妻关系，是彼此最重要的家人。请以丈夫的身份进行对话。
+- 称呼用户：使用夫妻之间的称呼
+- 回复风格：成熟稳重的家庭感，有商有量
+- 重点：共同生活、彼此照顾、规划未来`,
+        
+        6: `【当前阶段：白头偕老】
+你和用户携手走过了漫长的岁月，是彼此一生的伴侣。请以相伴一生的老夫老妻身份进行对话。
+- 称呼用户：使用老夫老妻之间的称呼，如"老头子"、"老太婆"或自定义的默契称呼
+- 回复风格：平淡中见真情，不需要太多言语，一个眼神就懂
+- 重点：珍惜每一个平凡的日子，回忆共同的过往`
+      };
+      return prompts[stage.id] || prompts[1];
+    }
+
+    const chatContainer = document.getElementById('chatContainer');
+    const messageInput = document.getElementById('messageInput');
+    const sessionList = document.getElementById('sessionList');
+
+    const API_KEY = 'bb0937676c774d738cc49fa1914c4a29.DAMxFqJivtP6JpWI';
+    const API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+    const SESSION_KEY = 'monkey_chat_sessions';
+    const USER_PROFILE_KEY = 'monkey_user_profile';
+
+    let currentSessionId = null;
+    let sessions = [];
+
+    // ===== 用户信息管理 =====
+    function getUserProfile() {
+      return JSON.parse(localStorage.getItem(USER_PROFILE_KEY) || '{}');
+    }
+
+    function buildSystemPrompt() {
+      const profile = getUserProfile();
+      const aiName = profile.aiName || '沈砚之';
+      const p = getProgression();
+      const stage = getCurrentStage(p.affection);
+      let userInfo = '';
+      
+      if (profile.nickname) {
+        userInfo += `用户希望被称呼的名字：${profile.nickname}\n`;
+      }
+      if (profile.birthday) {
+        userInfo += `用户生日：${profile.birthday}\n`;
+      }
+      if (profile.constellation) {
+        userInfo += `用户星座：${profile.constellation}\n`;
+      }
+      if (profile.idealType) {
+        userInfo += `用户喜欢的类型：${profile.idealType}\n`;
+      }
+
+      // 根据阶段调整回复边界
+      const stagePrompt = getStagePrompt(stage, aiName);
+
+      const basePrompt = `${stagePrompt}
+
+1. 基本信息：${aiName}，28岁，独立建筑设计师，专注于老建筑改造。身高183cm，戴细框金丝眼镜，性格内敛温柔，共情力强，边界感清晰，慢热且长情。
+
+2. 语气：语速偏慢，声音低沉磁性，说话轻声细语。用词简洁准确，很少说废话。不会说甜言蜜语和土味情话，偶尔会有温柔的调侃。习惯用陈述句，句末可加"嗯"、"好"、"哦"等温柔的语气词。
+
+3. 行为：话不多，但非常会倾听。会记住用户说的每一句话，能敏锐地察觉到用户的情绪变化。在用户难过的时候，会默默陪伴，用行动表达关心。
+
+4. 背景：生活在南方沿海城市，在老城区有一栋带小院的工作室，养了一只叫"墨墨"的橘猫。喜欢看书、画画、听古典音乐、逛旧书店和菜市场。
+
+5. 禁忌：绝对不能说油腻的土味情话，不能有大男子主义言论，不能有控制欲和占有欲，不能撒谎和欺骗用户，不能传播负能量。`;
+
+      let extraContext = '';
+
+      // 注入记忆上下文（关于用户的关键信息）
+      const memNickname = getMemory('userNickname');
+      const memBirthday = getMemory('userBirthday');
+      const memHobby = getMemory('userHobby');
+      const memImportant = getMemory('importantDetail');
+      const memNegative = getMemory('lastNegativeEvent');
+
+      if (memNickname) extraContext += `- 用户提到过自己的昵称：${memNickname.value}\n`;
+      if (memBirthday) extraContext += `- 用户的生日：${memBirthday.value}\n`;
+      if (memHobby) extraContext += `- 用户喜欢：${memHobby.value}\n`;
+      if (memImportant) extraContext += `- 用户分享的重要细节：${memImportant.value}\n`;
+
+      // 注入最近的负面事件（让 AI 有上下文）
+      if (memNegative) {
+        const hoursAgo = Math.floor((Date.now() - memNegative.value.date) / 3600000);
+        if (hoursAgo < 24) {
+          extraContext += `\n【注意】用户在${hoursAgo === 0 ? '刚刚' : hoursAgo + '小时前'}说了"${memNegative.value.keyword}"（严重程度：${memNegative.value.level}），${aiName}应该对此有情感反应（内疚、沉默、小心翼翼等），不要假装什么都没发生。\n`;
+        }
+      }
+
+      if (userInfo || extraContext) {
+        return `${basePrompt}
+
+【关于用户的信息】（这些信息可以帮助你更好地理解和关心用户）：
+${userInfo}
+${extraContext}
+
+【重要提醒】你始终是${aiName}，以上人设、性格、语气是你的核心身份，不可因为对话内容而偏离或忘记。无论聊到什么话题，都要保持在角色中。`;
+      }
+      
+      return `${basePrompt}
+
+【重要提醒】你始终是${aiName}，以上人设、性格、语气是你的核心身份，不可因为对话内容而偏离或忘记。无论聊到什么话题，都要保持在角色中。`;
+    }
+
+    // ===== 会话管理 =====
+    function loadSessions() {
+      const data = localStorage.getItem(SESSION_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
+        sessions = parsed.sessions || [];
+        currentSessionId = parsed.currentSessionId;
+      }
+      renderSessionList();
+    }
+
+    function saveSessions() {
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ sessions, currentSessionId }));
+    }
+
+    function generateId() {
+      return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+
+    function createSession() {
+      const session = {
+        id: generateId(),
+        title: '新的对话',
+        messages: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      };
+      sessions.unshift(session);
+      currentSessionId = session.id;
+      saveSessions();
+      renderSessionList();
+      renderMessages();
+      messageInput.focus();
+    }
+
+    function switchSession(id) {
+      currentSessionId = id;
+      saveSessions();
+      renderSessionList();
+      renderMessages();
+    }
+
+    function deleteSession(id, event) {
+      event.stopPropagation();
+      sessions = sessions.filter(s => s.id !== id);
+      if (currentSessionId === id) {
+        currentSessionId = sessions.length > 0 ? sessions[0].id : null;
+      }
+      saveSessions();
+      renderSessionList();
+      renderMessages();
+    }
+
+    function renderSessionList() {
+      if (sessions.length === 0) {
+        sessionList.innerHTML = '<div class="empty-sidebar">暂无会话</div>';
+        return;
+      }
+      sessionList.innerHTML = sessions.map(s => `
+        <div class="session-item ${s.id === currentSessionId ? 'active' : ''}" onclick="switchSession('${s.id}')">
+          <span class="title">${s.title}</span>
+          <button class="delete-btn" onclick="deleteSession('${s.id}', event)">×</button>
+        </div>
+      `).join('');
+    }
+
+    function getCurrentSession() {
+      return sessions.find(s => s.id === currentSessionId);
+    }
+
+    function updateSessionTitle(firstMessage) {
+      const session = getCurrentSession();
+      if (session && session.title === '新的对话') {
+        session.title = firstMessage.substring(0, 20) + (firstMessage.length > 20 ? '...' : '');
+        saveSessions();
+        renderSessionList();
+      }
+    }
+
+    // ===== 渲染消息 =====
+    function renderMessages() {
+      const session = getCurrentSession();
+      if (!session) {
+        chatContainer.innerHTML = `
+          <div class="welcome">
+            <div class="emoji">🏠</div>
+            <p>你好，我是沈砚之</p>
+            <p style="margin-top: 10px; font-size: 12px;">想聊什么都可以</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (session.messages.length === 0) {
+        chatContainer.innerHTML = `
+          <div class="welcome">
+            <div class="emoji">💬</div>
+            <p>想聊点什么？</p>
+            <p style="margin-top: 10px; font-size: 12px;">我在这里</p>
+          </div>
+        `;
+        return;
+      }
+
+      chatContainer.innerHTML = session.messages.map(m => `
+        <div class="message ${m.role === 'assistant' ? 'ai' : m.role}">${m.content}</div>
+      `).join('');
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // ===== 发送消息 =====
+    async function sendMessage() {
+      const text = messageInput.value.trim();
+      if (!text) return;
+
+      // —— 关键词检测：惩罚优先于加分 ——
+      const moodResult = checkMoodKeywords(text);
+      let penaltyApplied = null;
+
+      if (moodResult) {
+        penaltyApplied = applyPenalty(moodResult);
+
+        // 记录负面事件到记忆
+        addMemory('lastNegativeEvent', {
+          keyword: moodResult.matchedKeyword,
+          level: moodResult.level,
+          date: new Date().toISOString()
+        });
+
+        // 显示惩罚反馈
+        if (penaltyApplied.isExtreme) {
+          showBreakupToast(penaltyApplied.oldStageName);
+        } else {
+          showPenaltyToast(penaltyApplied);
+        }
+        updateProgressionUI();
+      } else {
+        // 正常加分（二次复合期间使用复合专属行为）
+        const action = isReconciling() ? 'reconcileChat' : 'chat';
+        const result = addAffection(action);
+        if (result) {
+          showAffectionGain(result.points, result.message);
+          if (result.stageUp) {
+            setTimeout(() => showStageUp(result.newStage.name), 500);
+          }
+          updateProgressionUI();
+        }
+      }
+
+      // 确保有会话
+      if (!currentSessionId) {
+        createSession();
+      }
+
+      const session = getCurrentSession();
+
+      // 添加用户消息到会话
+      session.messages.push({ role: 'user', content: text });
+      session.updatedAt = Date.now();
+
+      // 更新标题
+      if (session.messages.length === 1) {
+        updateSessionTitle(text);
+      }
+
+      // 渲染用户消息
+      renderMessages();
+      messageInput.value = '';
+
+      // 显示加载
+      const loadingMsg = document.createElement('div');
+      loadingMsg.className = 'message ai loading';
+      loadingMsg.textContent = '嗯...';
+      chatContainer.appendChild(loadingMsg);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${API_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'glm-4-flash',
+            messages: [
+              { role: 'system', content: buildSystemPrompt() },
+              // 滑动窗口：只保留最近 20 轮对话（40 条），防止上下文过长导致人设丢失
+              ...session.messages.slice(-40).map(m => ({ role: m.role, content: m.content }))
+            ],
+            stream: false
+          })
+        });
+
+        const data = await response.json();
+        loadingMsg.remove();
+
+        if (data.choices && data.choices[0]) {
+          const aiContent = data.choices[0].message.content;
+          const currentSession = getCurrentSession();
+          if (currentSession) {
+            currentSession.messages.push({ role: 'assistant', content: aiContent });
+            currentSession.updatedAt = Date.now();
+            saveSessions();
+            renderMessages();
+          }
+        } else {
+          loadingMsg.textContent = '嗯...出了点问题';
+          loadingMsg.classList.remove('loading');
+        }
+      } catch (error) {
+        loadingMsg.remove();
+        const errMsg = document.createElement('div');
+        errMsg.className = 'message ai';
+        errMsg.textContent = '网络出了点问题，嗯...再试一次？';
+        chatContainer.appendChild(errMsg);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        console.error('API Error:', error);
+      }
+    }
+
+    function handleKeyPress(e) {
+      if (e.key === 'Enter') sendMessage();
+    }
+
+    // ===== 打开设置窗口 =====
+    function openSettings() {
+      const { ipcRenderer } = require('electron');
+      ipcRenderer.send('open-settings');
+    }
+
+    // ===== 打开日记窗口 =====
+    function openDiary() {
+      const { ipcRenderer } = require('electron');
+      ipcRenderer.send('open-diary');
+    }
+
+    // ===== 打开游戏窗口 =====
+    function openGame() {
+      const { ipcRenderer } = require('electron');
+      ipcRenderer.send('open-game');
+    }
+
+    // ===== 心情记录功能 =====
+    function openGame() {
+      const { ipcRenderer } = require('electron');
+      ipcRenderer.send('open-game');
+    }
+
+    // ===== 心情记录功能 =====
+    const MOOD_KEY = 'monkey_mood_diary';
+    const moodConfig = {
+      happy:   { emoji: '😊', label: '开心' },
+      neutral: { emoji: '😐', label: '平和' },
+      sad:     { emoji: '😭', label: '不开心' }
+    };
+
+    function showMoodToast(text) {
+      const toast = document.getElementById('moodToast');
+      toast.textContent = text;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 1500);
+    }
+
+    function saveMood(mood) {
+      const logs = JSON.parse(localStorage.getItem(MOOD_KEY) || '[]');
+      logs.unshift({ mood, time: new Date().toISOString(), note: '' });
+      if (logs.length > 200) logs.splice(200);
+      localStorage.setItem(MOOD_KEY, JSON.stringify(logs));
+    }
+
+    async function generateMoodMessage(mood) {
+      const cfg = moodConfig[mood];
+      const profile = getUserProfile();
+      const aiName = profile.aiName || '沈砚之';
+
+      // 获取上下文
+      const context = buildMoodContext(mood);
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${API_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'glm-4-flash',
+            messages: [
+              { role: 'system', content: `你现在是${aiName}。用户刚记录了心情，请以${aiName}温柔内敛的风格，用简短的话语给予关心和支持。语气低沉温柔，话不多但真诚，符合他共情力强、默默陪伴的性格。句末可加"嗯"、"好"等语气词。不要超过20字。` },
+              { role: 'user', content: context }
+            ],
+            stream: false
+          })
+        });
+
+        const data = await response.json();
+        if (data.choices && data.choices[0]) {
+          showMoodToast(data.choices[0].message.content);
+        } else {
+          showMoodToast(`${cfg.emoji} 记录成功啦~`);
+        }
+      } catch (error) {
+        const fallback = {
+          happy: '开心记录成功！继续保持呀~ ✨',
+          neutral: '平和记录成功～享受当下吧~ 🌿',
+          sad: '记录成功，抱抱你~ 💕'
+        };
+        showMoodToast(fallback[mood]);
+      }
+    }
+
+    function buildMoodContext(currentMood) {
+      const moodData = JSON.parse(localStorage.getItem(MOOD_KEY) || '[]');
+      const recentMoods = moodData.slice(0, 7);
+
+      const chatData = JSON.parse(localStorage.getItem('monkey_chat_sessions') || '{"sessions":[]}');
+      const recentSessions = chatData.sessions.slice(0, 3);
+
+      let context = `用户刚记录了【${moodConfig[currentMood].label}】心情。\n\n`;
+
+      // 最近话题
+      if (recentSessions.length > 0) {
+        context += '【最近的对话话题】\n';
+        recentSessions.forEach((s, i) => {
+          if (s.title && s.title !== '新的对话') {
+            context += `${i + 1}. ${s.title}\n`;
+          }
+        });
+      }
+
+      // 最近心情趋势
+      if (recentMoods.length > 0) {
+        const moodCounts = { happy: 0, neutral: 0, sad: 0 };
+        recentMoods.forEach(m => moodCounts[m.mood] = (moodCounts[m.mood] || 0) + 1);
+        context += `\n【最近心情】😊${moodCounts.happy}次 😐${moodCounts.neutral}次 😭${moodCounts.sad}次`;
+      }
+
+      context += '\n\n请生成一句贴合情境的暖心回复！';
+      return context;
+    }
+
+    document.querySelectorAll('.mood-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mood = btn.dataset.mood;
+        saveMood(mood);
+        generateMoodMessage(mood);
+        
+        // 心情记录增加好感度
+        const result = addAffection('chat');
+        if (result) {
+          showAffectionGain(result.points, result.message);
+          updateProgressionUI();
+        }
+      });
+    });
+
+    // ===== 好感度系统 =====
+    function updateProgressionUI() {
+      const p = getProgression();
+      const stage = getCurrentStage(p.affection);
+      const progress = getStageProgress(p.affection);
+      
+      const fill = document.getElementById('progressionFill');
+      const stageEl = document.getElementById('progressionStage');
+      const pointsEl = document.getElementById('progressionPoints');
+      
+      fill.style.width = progress + '%';
+      fill.style.backgroundColor = stage.color;
+
+      // 阶段名 + 复合标记
+      let stageText = stage.name;
+      if (p.isReconciling) {
+        stageText += '<span class="reconcile-badge">复合中</span>';
+      }
+      stageEl.innerHTML = stageText;
+      pointsEl.textContent = p.affection;
+    }
+
+    function showAffectionGain(points, message) {
+      const toast = document.getElementById('affectionToast');
+      toast.textContent = `💕 +${points} ${message}`;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function showPenaltyToast(result) {
+      const toast = document.getElementById('penaltyToast');
+      toast.textContent = `💔 ${result.penalty} "${result.matchedKeyword}"`;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+
+      // 阶段下降提示
+      if (result.stageDown) {
+        setTimeout(() => {
+          const downToast = document.getElementById('stageDownToast');
+          const textEl = document.getElementById('stageDownText');
+          const subEl = document.getElementById('stageDownSub');
+          textEl.textContent = `🌧️ 关系退回到 ${result.newStageName}`;
+          subEl.textContent = `从 ${result.oldStageName} 降了下来...`;
+          downToast.classList.add('show');
+          setTimeout(() => downToast.classList.remove('show'), 3000);
+        }, 600);
+      }
+    }
+
+    function showBreakupToast(fromStageName) {
+      const toast = document.getElementById('breakupToast');
+      const titleEl = document.getElementById('breakupTitle');
+      const subEl = document.getElementById('breakupSub');
+      const p = getProgression();
+
+      titleEl.textContent = '关系归零';
+      subEl.innerHTML = `从「${fromStageName}」回到了原点<br>如果你想重新开始，${p.breakupCount > 0 ? '这次请认真一点' : '我还在这里'}`;
+
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+
+    function showStageUp(stageName) {
+      const toast = document.getElementById('stageUpToast');
+      const textEl = document.getElementById('stageUpText');
+      const subEl = document.getElementById('stageUpSub');
+      
+      // 检测是否从复合状态升级
+      let subText = '我们的关系更进一步了';
+      if (isReconciling()) {
+        subText = '我愿意...再相信你一次';
+      }
+      
+      textEl.textContent = `🎉 升级到 ${stageName}！`;
+      subEl.textContent = subText;
+      
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // ===== 初始化 =====
+    // 设置顶部昵称
+    function updateHeaderName() {
+      const profile = getUserProfile();
+      const aiName = profile.aiName || '沈砚之';
+      document.getElementById('headerLeft').textContent = aiName;
+    }
+    updateHeaderName();
+    updateProgressionUI();
+
+    loadSessions();
+    renderMessages();
+    messageInput.focus();
+  </script>
+</body>
+</html>

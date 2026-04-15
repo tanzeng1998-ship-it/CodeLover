@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚙️ 个人设置</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(180deg, #fef9f9 0%, #fff5f7 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .container {
+      padding: 24px;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      color: #2a2a3e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: #888;
+      margin-top: 6px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #2a2a3e;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #e8e8e8;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+      background: #fafafa;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #FFB7C5;
+      background: white;
+    }
+
+    .form-group textarea {
+      resize: none;
+      height: 60px;
+    }
+
+    .form-group select {
+      cursor: pointer;
+    }
+
+    .btn-save {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #FFB7C5 0%, #FF9AAF 100%);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(255,154,175,0.4);
+    }
+
+    .btn-save:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(255,154,175,0.5);
+    }
+
+    .btn-save:active {
+      transform: translateY(0);
+    }
+
+    .btn-save.saved {
+      background: linear-gradient(135deg, #81C784 0%, #66BB6A 100%);
+      box-shadow: 0 4px 12px rgba(102,187,106,0.4);
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(50,50,50,0.9);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .avatar-preview {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #FFB7C5 0%, #FF9AAF 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin: 0 auto 12px;
+    }
+
+    .constellation-hint {
+      font-size: 11px;
+      color: #999;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>⚙️ 个人设置</h1>
+      <p>让我更了解你</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">👤 基本信息</div>
+      
+      <div class="form-group">
+        <label>希望被称呼</label>
+        <input type="text" id="nickname" placeholder="希望我怎么称呼你？" maxlength="20">
+      </div>
+
+      <div class="form-group">
+        <label>男友昵称</label>
+        <input type="text" id="aiName" placeholder="默认：沈砚之" maxlength="20" value="沈砚之">
+      </div>
+
+      <div class="form-group">
+        <label>生日</label>
+        <input type="date" id="birthday">
+      </div>
+
+      <div class="form-group">
+        <label>星座</label>
+        <select id="constellation">
+          <option value="">请选择星座</option>
+          <option value="白羊座">♈ 白羊座 (3.21-4.19)</option>
+          <option value="金牛座">♉ 金牛座 (4.20-5.20)</option>
+          <option value="双子座">♊ 双子座 (5.21-6.21)</option>
+          <option value="巨蟹座">♋ 巨蟹座 (6.22-7.22)</option>
+          <option value="狮子座">♌ 狮子座 (7.23-8.22)</option>
+          <option value="处女座">♍ 处女座 (8.23-9.22)</option>
+          <option value="天秤座">♎ 天秤座 (9.23-10.23)</option>
+          <option value="天蝎座">♏ 天蝎座 (10.24-11.22)</option>
+          <option value="射手座">♐ 射手座 (11.23-12.21)</option>
+          <option value="摩羯座">♑ 摩羯座 (12.22-1.19)</option>
+          <option value="水瓶座">♒ 水瓶座 (1.20-2.18)</option>
+          <option value="双鱼座">♓ 双鱼座 (2.19-3.20)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💕 理想型</div>
+      
+      <div class="form-group">
+        <label>喜欢的人的类型</label>
+        <textarea id="idealType" placeholder="你喜欢什么类型的呢？温柔体贴？还是阳光开朗？"></textarea>
+      </div>
+    </div>
+
+    <button class="btn-save" id="saveBtn">保存设置</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const USER_PROFILE_KEY = 'monkey_user_profile';
+
+    // 加载已有数据
+    function loadProfile() {
+      const profile = JSON.parse(localStorage.getItem(USER_PROFILE_KEY) || '{}');
+      if (profile.nickname) document.getElementById('nickname').value = profile.nickname;
+      if (profile.birthday) document.getElementById('birthday').value = profile.birthday;
+      if (profile.constellation) document.getElementById('constellation').value = profile.constellation;
+      if (profile.idealType) document.getElementById('idealType').value = profile.idealType;
+      if (profile.aiName) document.getElementById('aiName').value = profile.aiName;
+      
+      // 自动根据生日设置星座
+      document.getElementById('birthday').addEventListener('change', autoSetConstellation);
+    }
+
+    // 根据生日自动设置星座
+    function autoSetConstellation() {
+      const birthday = document.getElementById('birthday').value;
+      if (!birthday) return;
+      
+      const month = parseInt(birthday.split('-')[1]);
+      const day = parseInt(birthday.split('-')[2]);
+      
+      const constellations = [
+        { name: '白羊座', start: [3, 21], end: [4, 19] },
+        { name: '金牛座', start: [4, 20], end: [5, 20] },
+        { name: '双子座', start: [5, 21], end: [6, 21] },
+        { name: '巨蟹座', start: [6, 22], end: [7, 22] },
+        { name: '狮子座', start: [7, 23], end: [8, 22] },
+        { name: '处女座', start: [8, 23], end: [9, 22] },
+        { name: '天秤座', start: [9, 23], end: [10, 23] },
+        { name: '天蝎座', start: [10, 24], end: [11, 22] },
+        { name: '射手座', start: [11, 23], end: [12, 21] },
+        { name: '摩羯座', start: [12, 22], end: [1, 19] },
+        { name: '水瓶座', start: [1, 20], end: [2, 18] },
+        { name: '双鱼座', start: [2, 19], end: [3, 20] },
+      ];
+      
+      for (const c of constellations) {
+        if (c.name === '摩羯座') {
+          if (month === 12 && day >= 22 || month === 1 && day <= 19) {
+            document.getElementById('constellation').value = c.name;
+            break;
+          }
+        } else {
+          if (month === c.start[0] && day >= c.start[1] || month === c.end[0] && day <= c.end[1]) {
+            document.getElementById('constellation').value = c.name;
+            break;
+          }
+        }
+      }
+    }
+
+    // 保存设置
+    function saveProfile() {
+      const nickname = document.getElementById('nickname').value.trim();
+      const birthday = document.getElementById('birthday').value;
+      const constellation = document.getElementById('constellation').value;
+      const idealType = document.getElementById('idealType').value.trim();
+      const aiName = document.getElementById('aiName').value.trim() || '沈砚之';
+
+      const profile = {
+        nickname,
+        birthday,
+        constellation,
+        idealType,
+        aiName,
+        updatedAt: new Date().toISOString()
+      };
+
+      localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(profile));
+
+      // 显示保存成功
+      const btn = document.getElementById('saveBtn');
+      btn.textContent = '✓ 已保存';
+      btn.classList.add('saved');
+      
+      showToast('设置已保存，我会更懂你~');
+
+      setTimeout(() => {
+        btn.textContent = '保存设置';
+        btn.classList.remove('saved');
+      }, 2000);
+    }
+
+    // 显示提示
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // 事件绑定
+    document.getElementById('saveBtn').addEventListener('click', saveProfile);
+
+    // 初始化
+    loadProfile();
+  </script>
+</body>
+</html>

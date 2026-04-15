@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeMonkey - 程序员桌面宠物</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      background: transparent;
+      overflow: hidden;
+      cursor: default;
+    }
+
+    .pet-container {
+      width: 320px;
+      height: 360px;
+      position: relative;
+      -webkit-app-region: drag;
+    }
+
+    /* 拖拽热区覆盖层 */
+    .drag-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+      pointer-events: auto;
+    }
+
+    /* ========== 宠物主体图片 ========== */
+    .pet-image {
+      position: absolute;
+      width: 260px;
+      height: 280px;
+      left: 10px;
+      top: 30px;
+      animation: bounce 1s ease-in-out infinite;
+      pointer-events: none;
+      object-fit: contain;
+      image-rendering: -webkit-optimize-contrast;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    /* 对话气泡 */
+    .speech-bubble {
+      position: absolute;
+      background: white;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      color: #333;
+      top: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      white-space: nowrap;
+      z-index: 100;
+      -webkit-app-region: no-drag;
+    }
+
+    .speech-bubble.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-5px);
+    }
+
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -7px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 8px solid white;
+    }
+
+    /* 星星特效 */
+    .stars {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 50;
+    }
+
+    .star {
+      position: absolute;
+      font-size: 14px;
+      animation: starPop 0.6s ease-out forwards;
+    }
+
+    @keyframes starPop {
+      0% { transform: scale(0) rotate(0deg); opacity: 1; }
+      100% { transform: scale(1) rotate(180deg) translateY(-15px); opacity: 0; }
+    }
+
+    /* 点击涟漪效果 */
+    .ripple {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      background: rgba(255, 183, 197, 0.5);
+      border-radius: 50%;
+      animation: rippleEffect 0.5s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes rippleEffect {
+      0% { transform: scale(0); opacity: 1; }
+      100% { transform: scale(3); opacity: 0; }
+    }
+
+    /* 桌面窗口按钮 - 左上角日记按钮 */
+    .window-diary-btn {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.7);
+      background: linear-gradient(135deg, #FFB7C5 0%, #E890A0 100%);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(255,100,140,0.4);
+      transition: transform 0.15s;
+      -webkit-app-region: no-drag;
+      z-index: 100;
+    }
+    .window-diary-btn:hover {
+      transform: scale(1.15);
+    }
+
+    /* 桌面窗口按钮 - 左二设置按钮 */
+    .window-settings-btn {
+      position: absolute;
+      top: 6px;
+      left: 36px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.7);
+      background: linear-gradient(135deg, #B8D4E8 0%, #8BB8D8 100%);
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(100,150,200,0.4);
+      transition: transform 0.15s;
+      -webkit-app-region: no-drag;
+      z-index: 100;
+    }
+    .window-settings-btn:hover {
+      transform: scale(1.15);
+    }
+
+    /* 桌面窗口按钮 - 右侧对话按钮 */
+    .window-chat-btn {
+      position: absolute;
+      top: 20px;
+      right: 55px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.9);
+      background: linear-gradient(135deg, #FFB7C5 0%, #E890A0 100%);
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(255,100,140,0.6);
+      transition: transform 0.15s;
+      -webkit-app-region: no-drag;
+      pointer-events: auto;
+      z-index: 200;
+    }
+    .window-chat-btn:hover {
+      transform: scale(1.2);
+    }
+
+    /* 状态文字（隐藏，移到屏幕上了） */
+    .status {
+      display: none;
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      color: #666;
+      white-space: nowrap;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      -webkit-app-region: no-drag;
+    }
+
+    /* ===== Hover 动画增强 ===== */
+    .pet-image.is-hovered {
+      animation: bounce-fast 0.4s ease-in-out infinite;
+    }
+    @keyframes bounce-fast {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-8px) scale(1.04); }
+    }
+
+    .speech-bubble.hover-bubble {
+      background: linear-gradient(135deg, #fff0f5 0%, #ffe4ee 100%);
+      border: 2px solid #FFB7C5;
+      font-weight: bold;
+      font-size: 13px;
+      color: #d63384;
+    }
+
+    .emoji-overlay {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 18px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 50;
+      transition: opacity 0.2s;
+    }
+    .emoji-overlay.show {
+      opacity: 1;
+      animation: emoji-pop 0.4s ease-out;
+    }
+    @keyframes emoji-pop {
+      0% { transform: translateX(-50%) scale(0.5); }
+      60% { transform: translateX(-50%) scale(1.2); }
+      100% { transform: translateX(-50%) scale(1); }
+    }
+
+    /* ===== 心情弹出提示 ===== */
+    .mood-toast {
+      position: absolute;
+      top: 5px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      background: rgba(30,30,30,0.85);
+      color: white;
+      font-size: 11px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s;
+      white-space: nowrap;
+      z-index: 300;
+      font-family: -apple-system, sans-serif;
+    }
+    .mood-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="pet-container" id="petContainer">
+    <!-- 拖拽热区覆盖层 -->
+    <div class="drag-overlay" id="dragOverlay"></div>
+    
+    <div class="speech-bubble" id="speechBubble">Hello World!</div>
+    <div class="stars" id="stars"></div>
+
+    <!-- 桌面窗口按钮 - 右上角对话 -->
+    <button class="window-chat-btn" id="chatBtn" title="AI对话">💬</button>
+
+    <img class="pet-image" id="petImage" src="pet-image.png" alt="桌面宠物">
+    <div class="emoji-overlay" id="emojiOverlay"></div>
+
+    <div class="status" id="status">💻 写代码中...</div>
+  </div>
+
+  <!-- 心情弹出提示（放在宠物容器外） -->
+  <div class="mood-toast" id="moodToast"></div>
+
+  <script>
+    const ipcRenderer = require('electron').ipcRenderer;
+    const petContainer = document.getElementById('petContainer');
+    const petImage = document.getElementById('petImage');
+    const speechBubble = document.getElementById('speechBubble');
+    const stars = document.getElementById('stars');
+    const status = document.getElementById('status');
+    const emojiOverlay = document.getElementById('emojiOverlay');
+    const moodToast = document.getElementById('moodToast');
+
+    // ===== 心情存储 =====
+    const MOOD_KEY = 'monkey_mood_diary';
+
+    const moodConfig = {
+      happy:   { emoji: '😊', label: '开心', color: '#FFD700', msg: '真开心～继续保持！🎉' },
+      neutral: { emoji: '😐', label: '平和', color: '#90CAF9', msg: '平平淡淡也挺好～😌' },
+      sad:     { emoji: '😢', label: '不开心', color: '#B0BEC5', msg: '别难过，摸摸猴头～🐵💗' },
+    };
+
+    function saveMood(moodKey) {
+      const records = JSON.parse(localStorage.getItem(MOOD_KEY) || '[]');
+      const now = new Date();
+      records.unshift({
+        mood: moodKey,
+        emoji: moodConfig[moodKey].emoji,
+        label: moodConfig[moodKey].label,
+        time: now.toLocaleString('zh-CN', { hour12: false }),
+        ts: now.getTime(),
+      });
+      // 最多保留 200 条
+      if (records.length > 200) records.splice(200);
+      localStorage.setItem(MOOD_KEY, JSON.stringify(records));
+    }
+
+    function showMoodToast(text, duration = 2200) {
+      moodToast.textContent = text;
+      moodToast.classList.add('show');
+      setTimeout(() => moodToast.classList.remove('show'), duration);
+    }
+
+    // 心情按钮点击
+    document.querySelectorAll('.mood-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const key = btn.dataset.mood;
+        const cfg = moodConfig[key];
+        saveMood(key);
+
+        // 按钮动画
+        btn.classList.remove('pressed');
+        void btn.offsetWidth;
+        btn.classList.add('pressed');
+        setTimeout(() => btn.classList.remove('pressed'), 400);
+
+        // 提示文字
+        showMoodToast(`${cfg.emoji} ${cfg.msg}`);
+        showSpeech(cfg.msg, 2500);
+        showStars();
+      });
+    });
+
+    // ===== 打开对话框窗口 =====
+    document.getElementById('chatBtn').addEventListener('click', e => {
+      e.stopPropagation();
+      ipcRenderer.send('open-chat');
+    });
+
+    // ===== 打开日记窗口 =====
+    document.getElementById('diaryBtn').addEventListener('click', e => {
+      e.stopPropagation();
+      ipcRenderer.send('open-diary');
+    });
+
+    // ===== 打开设置窗口 =====
+    document.getElementById('settingsBtn').addEventListener('click', e => {
+      e.stopPropagation();
+      ipcRenderer.send('open-settings');
+    });
+
+    // ===== 拖拽逻辑 =====
+    let isDragging = false;
+    let startX, startY, winX, winY;
+    const dragOverlay = document.getElementById('dragOverlay');
+
+    dragOverlay.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startX = e.screenX;
+      startY = e.screenY;
+      ipcRenderer.send('get-position');
+    });
+
+    ipcRenderer.on('position', (e, x, y) => {
+      winX = x;
+      winY = y;
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const newX = winX + (e.screenX - startX);
+      const newY = winY + (e.screenY - startY);
+      ipcRenderer.send('move-pet', newX, newY);
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    // ===== Hover 逻辑 =====
+    const greetings = [
+      'console.log("Hello!")', 'git push --force?', '这bug有毒...',
+      '喝杯咖啡继续~', '重构ing...', '代码跑起来了！',
+      '996是我的宿命', '产品经理又改需求了', '编译通过了！',
+      'CI/CD is green!', 'npm install...', 'Docker build!', 'TypeScript报错...',
+    ];
+
+    const statusTexts = [
+      '💻 coding...', '🐛 bugging...', '☕ resting...', '🔍 reviewing...',
+      '💪 overtime...', '🚀 deploying...', '🎮 slacking...', '🐙 merging...',
+    ];
+
+    const hoverStates = [
+      { emoji: '💗', text: '你来啦~' },
+      { emoji: '🌟', text: '哇，你来了！' },
+      { emoji: '🥰', text: '摸摸我~' },
+      { emoji: '😲', text: '吓我一跳！' },
+    ];
+
+    let hoverTimer = null;
+    let currentHoverIdx = 0;
+
+    function clearHoverState() {
+      petImage.classList.remove('is-hovered');
+      speechBubble.classList.remove('hover-bubble');
+    }
+
+    function applyHoverState(idx) {
+      clearHoverState();
+      const state = hoverStates[idx];
+      petImage.classList.add('is-hovered');
+      speechBubble.classList.add('hover-bubble');
+      emojiOverlay.textContent = state.emoji;
+      emojiOverlay.classList.remove('show');
+      void emojiOverlay.offsetWidth;
+      emojiOverlay.classList.add('show');
+      showSpeech(state.text, 99999);
+    }
+
+    petContainer.addEventListener('mouseenter', () => {
+      currentHoverIdx = Math.floor(Math.random() * hoverStates.length);
+      applyHoverState(currentHoverIdx);
+      hoverTimer = setInterval(() => {
+        currentHoverIdx = (currentHoverIdx + 1) % hoverStates.length;
+        applyHoverState(currentHoverIdx);
+      }, 1200);
+    });
+
+    petContainer.addEventListener('mouseleave', () => {
+      clearInterval(hoverTimer);
+      clearHoverState();
+      emojiOverlay.classList.remove('show');
+      speechBubble.classList.remove('show');
+    });
+
+    let speechTimeout, statusTimeout;
+
+    function showSpeech(text, duration = 3000) {
+      speechBubble.textContent = text;
+      speechBubble.classList.add('show');
+      clearTimeout(speechTimeout);
+      if (duration < 99999) {
+        speechTimeout = setTimeout(() => {
+          speechBubble.classList.remove('show');
+          speechTimeout = null;
+        }, duration);
+      }
+    }
+
+    function updateStatus() {
+      const screenStatus = document.getElementById('screenStatus');
+      screenStatus.textContent = statusTexts[Math.floor(Math.random() * statusTexts.length)];
+      statusTimeout = setTimeout(updateStatus, 5000);
+    }
+
+    function showStars() {
+      stars.innerHTML = '';
+      stars.style.opacity = '1';
+      const starEmojis = ['✨', '💫', '⭐', '🎉', '🔥', '💡', '🐛', '🚀'];
+      for (let i = 0; i < 6; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.textContent = starEmojis[Math.floor(Math.random() * starEmojis.length)];
+        star.style.left = (Math.random() * 180 + 30) + 'px';
+        star.style.top = (Math.random() * 120 + 30) + 'px';
+        star.style.animationDelay = (Math.random() * 0.3) + 's';
+        stars.appendChild(star);
+      }
+      setTimeout(() => { stars.style.opacity = '0'; }, 700);
+    }
+
+    function createRipple(e) {
+      const ripple = document.createElement('div');
+      ripple.className = 'ripple';
+      ripple.style.left = (e.offsetX - 7.5) + 'px';
+      ripple.style.top = (e.offsetY - 7.5) + 'px';
+      petImage.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 500);
+    }
+
+    petContainer.addEventListener('click', e => {
+      createRipple(e);
+      showStars();
+      showSpeech(greetings[Math.floor(Math.random() * greetings.length)]);
+    });
+
+    function startIdleBehavior() {
+      setInterval(() => {
+        if (!speechTimeout && Math.random() < 0.25) {
+          showSpeech(greetings[Math.floor(Math.random() * greetings.length)], 3000);
+        }
+      }, 10000);
+    }
+
+    setTimeout(() => showSpeech('console.log("Hello!")'), 800);
+    setTimeout(updateStatus, 3000);
+    startIdleBehavior();
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') window.close();
+    });
+  </script>
+</body>
+</html>

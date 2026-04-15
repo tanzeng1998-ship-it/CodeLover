@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>心情日记</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Segoe UI', sans-serif;
+      background: #fff5f8;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    /* 顶栏 */
+    .header {
+      background: linear-gradient(135deg, #FFB7C5 0%, #E890A0 100%);
+      padding: 18px 24px 14px;
+      -webkit-app-region: drag;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(232,144,160,0.3);
+    }
+
+    .header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 0.5px;
+    }
+
+    .header p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.85);
+      margin-top: 3px;
+    }
+
+    /* 统计区 */
+    .stats {
+      display: flex;
+      gap: 10px;
+      padding: 14px 16px;
+      background: white;
+      border-bottom: 1px solid #ffe0e8;
+    }
+
+    .stat-card {
+      flex: 1;
+      background: #fff5f8;
+      border-radius: 12px;
+      padding: 10px 8px;
+      text-align: center;
+      border: 1.5px solid #FFE4EC;
+    }
+
+    .stat-card .emoji { font-size: 20px; display: block; margin-bottom: 4px; }
+    .stat-card .count { font-size: 22px; font-weight: 700; color: #E890A0; display: block; }
+    .stat-card .label { font-size: 11px; color: #999; }
+
+    /* 筛选栏 */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      padding: 10px 16px;
+      background: white;
+      border-bottom: 1px solid #ffe0e8;
+      -webkit-app-region: no-drag;
+    }
+
+    .filter-btn {
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1.5px solid #ddd;
+      background: white;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: #666;
+    }
+
+    .filter-btn.active,
+    .filter-btn:hover {
+      background: linear-gradient(135deg, #FFB7C5 0%, #E890A0 100%);
+      border-color: transparent;
+      color: white;
+      font-weight: 600;
+    }
+
+    /* 日记列表 */
+    .list {
+      padding: 12px 16px;
+    }
+
+    /* 日期分组标题 */
+    .date-group {
+      font-size: 12px;
+      color: #bbb;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin: 14px 0 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .date-group::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #f0d0d8;
+    }
+
+    /* 单条记录 */
+    .record {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: white;
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 6px rgba(255,150,170,0.1);
+      border-left: 4px solid #eee;
+      transition: transform 0.12s;
+    }
+
+    .record:hover { transform: translateX(3px); }
+
+    .record.happy  { border-left-color: #FFD700; }
+    .record.neutral { border-left-color: #90CAF9; }
+    .record.sad    { border-left-color: #B0BEC5; }
+
+    .record .mood-emoji { font-size: 24px; flex-shrink: 0; }
+
+    .record .info { flex: 1; min-width: 0; }
+    .record .mood-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+    .record .mood-time {
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 2px;
+    }
+
+    /* 空状态 */
+    .empty {
+      text-align: center;
+      padding: 50px 0;
+      color: #ccc;
+    }
+    .empty .empty-icon { font-size: 48px; display: block; margin-bottom: 12px; }
+    .empty p { font-size: 14px; }
+
+    /* 清空按钮 */
+    .clear-btn {
+      display: block;
+      margin: 16px auto 24px;
+      padding: 8px 24px;
+      background: white;
+      border: 1.5px solid #FFB7C5;
+      color: #E890A0;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      -webkit-app-region: no-drag;
+    }
+    .clear-btn:hover {
+      background: #FFB7C5;
+      color: white;
+    }
+
+    /* 夸夸区 */
+    .kudos-area {
+      margin: 10px 16px;
+      padding: 10px 14px;
+      background: linear-gradient(135deg, #FFF9E6 0%, #FFF5E0 100%);
+      border-radius: 12px;
+      border: 1.5px solid #FFE4B5;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .kudos-area .kudos-icon { font-size: 20px; flex-shrink: 0; }
+    .kudos-area .kudos-text {
+      flex: 1;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.4;
+    }
+    .kudos-area .kudos-refresh {
+      padding: 5px 12px;
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+      border: none;
+      border-radius: 15px;
+      color: white;
+      font-size: 11px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .kudos-area.loading .kudos-text { opacity: 0.5; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>心情日记</h1>
+    <p id="headerSub">加载中...</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <span class="emoji">😊</span>
+      <span class="count" id="countHappy">0</span>
+      <span class="label">开心</span>
+    </div>
+    <div class="stat-card">
+      <span class="emoji">😐</span>
+      <span class="count" id="countNeutral">0</span>
+      <span class="label">平和</span>
+    </div>
+    <div class="stat-card">
+      <span class="emoji">😢</span>
+      <span class="count" id="countSad">0</span>
+      <span class="label">不开心</span>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all">全部</button>
+    <button class="filter-btn" data-filter="happy">😊 开心</button>
+    <button class="filter-btn" data-filter="neutral">😐 平和</button>
+    <button class="filter-btn" data-filter="sad">😢 不开心</button>
+  </div>
+
+  <div class="kudos-area" id="kudosArea">
+    <span class="kudos-icon">✨</span>
+    <span class="kudos-text" id="kudosText">加载中...</span>
+    <button class="kudos-refresh" onclick="refreshKudos()">🔄</button>
+  </div>
+
+  <div class="list" id="list"></div>
+
+  <button class="clear-btn" id="clearBtn">🗑️ 清空所有记录</button>
+
+  <script>
+    const MOOD_KEY = 'monkey_mood_diary';
+    let currentFilter = 'all';
+
+    const API_KEY = 'bb0937676c774d738cc49fa1914c4a29.DAMxFqJivtP6JpWI';
+    const API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+
+    // 预设夸夸（备用）
+    const PRESET_KUDOS = [
+      "你今天也在认真记录心情，真的很棒呢~ 🌟",
+      "愿意面对情绪的人，是最勇敢的！💪",
+      "每一条记录都是你成长的印记✨",
+      "今天也要元气满满哦~ 加油！🔥",
+      "情绪没有对错，记录它们就是爱自己 💕",
+      "你比自己想象的更强大 💫",
+      "善待自己的情绪，也是一种成熟 🌸",
+      "记录生活的人，生活也会记住你 🍀",
+    ];
+
+    async function refreshKudos() {
+      const kudosArea = document.getElementById('kudosArea');
+      const kudosText = document.getElementById('kudosText');
+      kudosArea.classList.add('loading');
+      kudosText.textContent = '(´･ω･`) 正在分析...';
+
+      // 获取上下文
+      const context = buildKudosContext();
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${API_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'glm-4-flash',
+            messages: [
+              { role: 'system', content: '你现在是沈砚之。请以他温柔内敛的风格，根据用户的心情记录和对话内容，生成一句简短的鼓励或关心的话。语气低沉真诚，话不多但温暖，符合他共情力强、默默陪伴的性格。不要超过20字。' },
+              { role: 'user', content: context }
+            ],
+            stream: false
+          })
+        });
+
+        const data = await response.json();
+        if (data.choices && data.choices[0]) {
+          kudosText.textContent = data.choices[0].message.content;
+        } else {
+          kudosText.textContent = PRESET_KUDOS[Math.floor(Math.random() * PRESET_KUDOS.length)];
+        }
+      } catch (error) {
+        kudosText.textContent = PRESET_KUDOS[Math.floor(Math.random() * PRESET_KUDOS.length)];
+      }
+
+      kudosArea.classList.remove('loading');
+    }
+
+    function buildKudosContext() {
+      // 获取最近的心情记录
+      const moodData = JSON.parse(localStorage.getItem(MOOD_KEY) || '[]');
+      const recentMoods = moodData.slice(0, 7);
+
+      // 获取最近的会话记录
+      const chatData = JSON.parse(localStorage.getItem('monkey_chat_sessions') || '{"sessions":[]}');
+      const recentSessions = chatData.sessions.slice(0, 3);
+
+      // 获取用户信息
+      const profile = JSON.parse(localStorage.getItem('monkey_user_profile') || '{}');
+
+      let context = '请根据以下信息生成夸夸：\n\n';
+
+      // 用户基本信息
+      if (profile.nickname || profile.constellation) {
+        context += '【用户信息】\n';
+        if (profile.nickname) context += `昵称：${profile.nickname}\n`;
+        if (profile.constellation) context += `星座：${profile.constellation}\n`;
+        if (profile.idealType) context += `理想型：${profile.idealType}\n`;
+        context += '\n';
+      }
+
+      // 心情分析
+      if (recentMoods.length > 0) {
+        const moodCounts = { happy: 0, neutral: 0, sad: 0 };
+        recentMoods.forEach(m => moodCounts[m.mood] = (moodCounts[m.mood] || 0) + 1);
+
+        context += '【最近7天心情统计】\n';
+        context += `😊开心: ${moodCounts.happy}次\n`;
+        context += `😐平和: ${moodCounts.neutral}次\n`;
+        context += `😭不开心: ${moodCounts.sad}次\n`;
+
+        // 判断趋势
+        const todayMood = moodData[0]?.mood;
+        const trend = moodCounts.happy >= moodCounts.sad ? 'positive' : 'need_encourage';
+        context += `趋势: ${trend === 'positive' ? '整体向好' : '需要鼓励'}\n`;
+      } else {
+        context += '【心情记录】暂无\n';
+      }
+
+      // 最近话题
+      if (recentSessions.length > 0) {
+        context += '\n【最近对话话题】\n';
+        recentSessions.forEach((s, i) => {
+          if (s.title && s.title !== '新的对话') {
+            context += `${i + 1}. ${s.title}\n`;
+          }
+        });
+      }
+
+      context += '\n请生成一句贴合用户实际情况的夸夸！';
+      return context;
+    }
+
+    // 初始化夸夸
+    refreshKudos();
+
+    function getRecords() {
+      return JSON.parse(localStorage.getItem(MOOD_KEY) || '[]');
+    }
+
+    function renderStats(records) {
+      document.getElementById('countHappy').textContent  = records.filter(r => r.mood === 'happy').length;
+      document.getElementById('countNeutral').textContent = records.filter(r => r.mood === 'neutral').length;
+      document.getElementById('countSad').textContent    = records.filter(r => r.mood === 'sad').length;
+
+      const total = records.length;
+      const sub = total === 0 ? '还没有记录，去点击猴子电脑上的心情吧~'
+        : `共 ${total} 条记录`;
+      document.getElementById('headerSub').textContent = sub;
+    }
+
+    function groupByDate(records) {
+      const groups = {};
+      records.forEach(r => {
+        // 处理 ISO 格式时间 "2026-04-15T14:17:00.000Z"
+        const date = r.time ? r.time.split('T')[0] : new Date(r.time).toISOString().split('T')[0];
+        if (!groups[date]) groups[date] = [];
+        groups[date].push(r);
+      });
+      return groups;
+    }
+
+    function renderList() {
+      const records = getRecords();
+      renderStats(records);
+
+      const filtered = currentFilter === 'all' ? records : records.filter(r => r.mood === currentFilter);
+      const list = document.getElementById('list');
+
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <div class="empty">
+            <span class="empty-icon">📭</span>
+            <p>暂无记录，去打个心情吧～</p>
+          </div>`;
+        return;
+      }
+
+      const groups = groupByDate(filtered);
+      const moodMap = { happy: { emoji: '😊', label: '开心' }, neutral: { emoji: '😐', label: '平和' }, sad: { emoji: '😭', label: '不开心' } };
+      let html = '';
+      Object.keys(groups).forEach(date => {
+        html += `<div class="date-group">${date}</div>`;
+        groups[date].forEach(r => {
+          const info = moodMap[r.mood] || { emoji: '😐', label: '未知' };
+          const timeStr = r.time ? r.time.replace('T', ' ').substring(0, 19) : '';
+          html += `
+            <div class="record ${r.mood}">
+              <span class="mood-emoji">${info.emoji}</span>
+              <div class="info">
+                <div class="mood-label">${info.label}</div>
+                <div class="mood-time">${timeStr}</div>
+              </div>
+            </div>`;
+        });
+      });
+
+      list.innerHTML = html;
+    }
+
+    // 筛选
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderList();
+      });
+    });
+
+    // 清空
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      if (confirm('确定要清空所有心情记录吗？')) {
+        localStorage.removeItem(MOOD_KEY);
+        renderList();
+      }
+    });
+
+    renderList();
+  </script>
+</body>
+</html>
