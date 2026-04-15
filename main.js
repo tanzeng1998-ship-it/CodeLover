@@ -120,7 +120,7 @@ function createGameWindow() {
   });
 
   gameWin.setMenuBarVisibility(false);
-  gameWin.loadFile('/Users/tanzeng/Desktop/game素材录制/小动物快跑.html');
+  gameWin.loadFile(path.join(__dirname, '小动物快跑.html'));
   gameWin.on('closed', () => { gameWin = null; });
 }
 
