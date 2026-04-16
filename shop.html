@@ -7,44 +7,44 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: rgba(189,161,102,0.05); }
-    ::-webkit-scrollbar-thumb { background: rgba(189,161,102,0.3); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(189,161,102,0.5); }
+    ::-webkit-scrollbar-track { background: rgba(255,160,185,0.05); }
+    ::-webkit-scrollbar-thumb { background: rgba(255,160,185,0.35); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,160,185,0.55); }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(180deg, #0a0a0a 0%, #111111 100%);
+      background: linear-gradient(180deg, #fff5f7 0%, #fdf0f5 100%);
       height: 100vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      color: #e8d7ad;
+      color: #5a3a4a;
     }
 
     /* 标题栏 */
     .titlebar {
-      background: linear-gradient(135deg, #1a1a1a 0%, #111111 100%);
+      background: rgba(255,245,248,0.95);
       padding: 10px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       -webkit-app-region: drag;
-      border-bottom: 1px solid rgba(189,161,102,0.45);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+      border-bottom: 1px solid rgba(255,160,185,0.4);
+      box-shadow: 0 2px 12px rgba(255,140,170,0.1);
       flex-shrink: 0;
     }
     .titlebar-title {
       font-size: 14px;
       font-weight: 600;
-      color: #e8d7ad;
+      color: #c03050;
       letter-spacing: 0.3px;
     }
     .titlebar-close {
       width: 26px; height: 26px;
       border-radius: 50%;
-      border: 1px solid rgba(189,161,102,0.6);
-      background: rgba(120,40,40,0.5);
-      color: #f1d9d9;
+      border: 1px solid rgba(255,160,185,0.6);
+      background: rgba(255,180,180,0.35);
+      color: #c03050;
       font-size: 13px;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
@@ -52,15 +52,16 @@
       -webkit-app-region: no-drag;
     }
     .titlebar-close:hover {
-      background: rgba(180,50,50,0.85);
-      border-color: #e08080;
+      background: rgba(220,80,100,0.7);
+      border-color: #ff8080;
+      color: #fff;
       transform: scale(1.1);
     }
 
     /* 顶部金币栏 */
     .coin-header {
-      background: rgba(15,15,15,0.9);
-      border-bottom: 1px solid rgba(189,161,102,0.25);
+      background: rgba(255,245,248,0.85);
+      border-bottom: 1px solid rgba(255,160,185,0.25);
       padding: 14px 20px;
       display: flex;
       justify-content: space-between;
@@ -72,10 +73,10 @@
       align-items: center;
       gap: 10px;
       padding: 8px 18px;
-      background: rgba(189,161,102,0.1);
+      background: rgba(255,183,197,0.2);
       border-radius: 50px;
-      border: 1px solid rgba(189,161,102,0.35);
-      box-shadow: 0 2px 12px rgba(189,161,102,0.1), inset 0 1px 0 rgba(255,223,154,0.08);
+      border: 1px solid rgba(255,160,185,0.4);
+      box-shadow: 0 2px 12px rgba(255,140,170,0.12), inset 0 1px 0 rgba(255,255,255,0.6);
     }
     .coin-icon {
       font-size: 22px;
@@ -88,17 +89,17 @@
     .coin-amount {
       font-size: 22px;
       font-weight: bold;
-      background: linear-gradient(135deg, #d4af50 0%, #c9a84c 100%);
+      background: linear-gradient(135deg, #e0607a 0%, #c03050 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
     .coin-income {
       font-size: 12px;
-      color: rgba(200,180,130,0.75);
+      color: rgba(192,96,120,0.75);
       text-align: right;
     }
-    .coin-income span { color: #c9a84c; font-weight: bold; }
+    .coin-income span { color: #c03050; font-weight: bold; }
 
     /* 商品列表 */
     .shop-container {
@@ -108,7 +109,7 @@
     }
     .shop-title {
       font-size: 14px;
-      color: #e8d7ad;
+      color: #c03050;
       margin-bottom: 16px;
       display: flex;
       align-items: center;
@@ -122,11 +123,11 @@
       gap: 14px;
     }
     .gift-item {
-      background: linear-gradient(180deg, rgba(22,22,22,0.9) 0%, rgba(14,14,14,0.95) 100%);
+      background: rgba(255,255,255,0.85);
       border-radius: 14px;
       padding: 16px 10px;
       text-align: center;
-      border: 1px solid rgba(189,161,102,0.2);
+      border: 1px solid rgba(255,160,185,0.25);
       transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
       cursor: pointer;
       position: relative;
@@ -137,26 +138,26 @@
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 2px;
-      background: linear-gradient(90deg, #c9a84c, #e8d7ad, #c9a84c);
+      background: linear-gradient(90deg, #FFB7C5, #fff, #FFB7C5);
       transform: scaleX(0);
       transition: transform 0.3s;
     }
     .gift-item:hover::before { transform: scaleX(1); }
     .gift-item:hover {
       transform: translateY(-4px);
-      border-color: rgba(189,161,102,0.5);
-      box-shadow: 0 8px 28px rgba(0,0,0,0.5), 0 0 15px rgba(189,161,102,0.08);
+      border-color: rgba(255,160,185,0.55);
+      box-shadow: 0 8px 28px rgba(255,140,170,0.2), 0 0 15px rgba(255,160,185,0.1);
     }
     .gift-item.owned {
-      border-color: rgba(100,180,100,0.4);
-      background: linear-gradient(180deg, rgba(20,35,20,0.9) 0%, rgba(12,22,12,0.95) 100%);
+      border-color: rgba(100,200,130,0.4);
+      background: rgba(240,255,245,0.85);
     }
     .gift-item.owned::after {
       content: '✓';
       position: absolute;
       top: 8px; right: 8px;
       width: 18px; height: 18px;
-      background: #4a9a4a;
+      background: #5ab87a;
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-size: 10px; color: white;
@@ -170,13 +171,13 @@
     .gift-item:hover .gift-emoji { transform: scale(1.12); }
     .gift-name {
       font-size: 13px;
-      color: #e8d7ad;
+      color: #5a3a4a;
       margin-bottom: 4px;
       font-weight: 600;
     }
     .gift-desc {
       font-size: 10px;
-      color: rgba(200,180,130,0.6);
+      color: rgba(160,80,100,0.65);
       margin-bottom: 12px;
       line-height: 1.4;
     }
@@ -184,26 +185,26 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      background: rgba(189,161,102,0.12);
-      color: #c9a84c;
+      background: rgba(255,160,185,0.15);
+      color: #c03050;
       padding: 5px 12px;
       border-radius: 20px;
       font-size: 12px;
       font-weight: bold;
-      border: 1px solid rgba(189,161,102,0.25);
+      border: 1px solid rgba(255,160,185,0.3);
     }
-    .gift-price.owned { color: #6ab96a; background: rgba(100,180,100,0.1); border-color: rgba(100,180,100,0.25); }
+    .gift-price.owned { color: #5ab87a; background: rgba(100,200,130,0.12); border-color: rgba(100,200,130,0.3); }
 
     /* 底部说明 */
     .shop-footer {
       padding: 14px 20px;
-      background: rgba(10,10,10,0.9);
-      border-top: 1px solid rgba(189,161,102,0.2);
+      background: rgba(255,245,248,0.9);
+      border-top: 1px solid rgba(255,160,185,0.2);
       flex-shrink: 0;
     }
     .income-rules h4 {
       font-size: 13px;
-      color: #e8d7ad;
+      color: #c03050;
       margin-bottom: 10px;
       display: flex; align-items: center; gap: 6px;
     }
@@ -215,21 +216,21 @@
     }
     .income-rules li {
       padding: 6px 10px;
-      background: rgba(22,22,22,0.8);
+      background: rgba(255,255,255,0.8);
       border-radius: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border: 1px solid rgba(189,161,102,0.1);
+      border: 1px solid rgba(255,160,185,0.15);
       font-size: 11px;
-      color: rgba(200,180,130,0.8);
+      color: rgba(160,80,100,0.85);
       transition: border-color 0.2s;
     }
-    .income-rules li:hover { border-color: rgba(189,161,102,0.3); }
+    .income-rules li:hover { border-color: rgba(255,160,185,0.35); }
     .coin-reward {
-      color: #c9a84c;
+      color: #c03050;
       font-weight: bold;
-      background: rgba(189,161,102,0.1);
+      background: rgba(255,160,185,0.15);
       padding: 2px 8px;
       border-radius: 10px;
       font-size: 10px;
@@ -239,23 +240,24 @@
     .buy-modal {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.75);
+      background: rgba(255,200,215,0.4);
       display: flex; align-items: center; justify-content: center;
       z-index: 1000;
       opacity: 0; pointer-events: none;
       transition: opacity 0.3s;
+      backdrop-filter: blur(4px);
     }
     .buy-modal.show { opacity: 1; pointer-events: auto; }
     .buy-modal .content {
-      background: linear-gradient(180deg, #1a1a1a 0%, #111111 100%);
+      background: linear-gradient(180deg, #fff5f7 0%, #fdf0f5 100%);
       padding: 30px 28px;
       border-radius: 20px;
       width: 300px;
       text-align: center;
       transform: scale(0.9);
       transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-      border: 1px solid rgba(189,161,102,0.4);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,223,154,0.07);
+      border: 1px solid rgba(255,160,185,0.5);
+      box-shadow: 0 20px 50px rgba(255,140,170,0.25), inset 0 1px 0 rgba(255,255,255,0.9);
     }
     .buy-modal.show .content { transform: scale(1); }
     .buy-modal .gift-preview {
@@ -268,11 +270,11 @@
       60% { transform: scale(1.15); }
       100% { transform: scale(1); }
     }
-    .buy-modal h3 { font-size: 18px; margin-bottom: 6px; color: #e8d7ad; }
-    .buy-modal p { font-size: 12px; color: rgba(200,180,130,0.6); margin-bottom: 16px; }
+    .buy-modal h3 { font-size: 18px; margin-bottom: 6px; color: #c03050; }
+    .buy-modal p { font-size: 12px; color: rgba(160,80,100,0.65); margin-bottom: 16px; }
     .buy-modal .price {
       font-size: 24px;
-      background: linear-gradient(135deg, #d4af50 0%, #c9a84c 100%);
+      background: linear-gradient(135deg, #e0607a 0%, #c03050 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -287,39 +289,39 @@
       transition: all 0.2s; font-weight: 600;
     }
     .buy-modal .btn-cancel {
-      background: rgba(255,255,255,0.06);
-      color: rgba(200,180,130,0.8);
-      border: 1px solid rgba(189,161,102,0.2);
+      background: rgba(255,255,255,0.7);
+      color: #a06070;
+      border: 1px solid rgba(255,160,185,0.3);
     }
-    .buy-modal .btn-cancel:hover { background: rgba(255,255,255,0.1); }
+    .buy-modal .btn-cancel:hover { background: rgba(255,240,245,0.9); }
     .buy-modal .btn-buy {
-      background: linear-gradient(135deg, #5b4a2d 0%, #46381f 100%);
-      color: #f1e5c7;
-      border: 1px solid #bca26a;
-      box-shadow: inset 0 1px 0 rgba(255,238,193,0.2);
+      background: linear-gradient(135deg, #FFB7C5 0%, #FF9AAF 100%);
+      color: #fff;
+      border: 1px solid #FF9AAF;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
     }
-    .buy-modal .btn-buy:hover { background: linear-gradient(135deg, #665434 0%, #4f3f24 100%); transform: translateY(-1px); }
-    .buy-modal .btn-buy:disabled { background: rgba(80,80,80,0.5); border-color: rgba(100,100,100,0.3); cursor: not-allowed; }
+    .buy-modal .btn-buy:hover { background: linear-gradient(135deg, #FF9AAF 0%, #FF7A9A 100%); transform: translateY(-1px); }
+    .buy-modal .btn-buy:disabled { background: rgba(200,180,190,0.4); border-color: rgba(200,180,190,0.3); cursor: not-allowed; }
 
     /* Toast */
     .toast {
       position: fixed;
       top: 80px; left: 50%;
       transform: translateX(-50%) translateY(-15px);
-      background: rgba(15,15,15,0.95);
-      color: #e8d7ad;
+      background: rgba(255,255,255,0.97);
+      color: #c03050;
       padding: 10px 22px;
       border-radius: 25px;
       font-size: 13px;
       opacity: 0; pointer-events: none;
       transition: opacity 0.3s, transform 0.3s;
       z-index: 2000;
-      border: 1px solid rgba(189,161,102,0.3);
-      box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,160,185,0.4);
+      box-shadow: 0 6px 24px rgba(255,140,170,0.2);
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .toast.success { background: linear-gradient(135deg, rgba(40,80,40,0.95) 0%, rgba(30,60,30,0.95) 100%); border-color: rgba(100,180,100,0.4); }
-    .toast.error { background: linear-gradient(135deg, rgba(80,30,30,0.95) 0%, rgba(60,20,20,0.95) 100%); border-color: rgba(180,80,80,0.4); }
+    .toast.success { background: linear-gradient(135deg, rgba(230,255,240,0.97) 0%, rgba(210,245,225,0.97) 100%); border-color: rgba(100,200,130,0.4); color: #3a8a5a; }
+    .toast.error { background: linear-gradient(135deg, rgba(255,220,225,0.97) 0%, rgba(255,200,210,0.97) 100%); border-color: rgba(255,120,140,0.4); color: #c03050; }
   </style>
 </head>
 <body>

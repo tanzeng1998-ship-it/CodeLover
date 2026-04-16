@@ -15,20 +15,20 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(180deg, #0a0a0a 0%, #111111 60%, #0d0d0d 100%);
+      background: linear-gradient(180deg, #fff5f7 0%, #fdf0f5 60%, #fff5f7 100%);
       min-height: 100vh;
-      color: #e8d7ad;
+      color: #5a3a4a;
     }
 
     .titlebar {
-      background: linear-gradient(135deg, #1a1a1a 0%, #111111 100%);
+      background: rgba(255,245,248,0.95);
       padding: 10px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       -webkit-app-region: drag;
-      border-bottom: 1px solid rgba(189,161,102,0.45);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+      border-bottom: 1px solid rgba(255,160,185,0.4);
+      box-shadow: 0 2px 12px rgba(255,140,170,0.1);
       position: sticky;
       top: 0;
       z-index: 100;
@@ -37,7 +37,7 @@
     .titlebar-title {
       font-size: 14px;
       font-weight: 600;
-      color: #e8d7ad;
+      color: #c03050;
       letter-spacing: 0.3px;
     }
 
@@ -45,9 +45,9 @@
       width: 26px;
       height: 26px;
       border-radius: 50%;
-      border: 1px solid rgba(189,161,102,0.6);
-      background: rgba(120,40,40,0.5);
-      color: #f1d9d9;
+      border: 1px solid rgba(255,160,185,0.6);
+      background: rgba(255,180,180,0.35);
+      color: #c03050;
       font-size: 13px;
       cursor: pointer;
       display: flex;
@@ -58,8 +58,9 @@
       line-height: 1;
     }
     .titlebar-close:hover {
-      background: rgba(180,50,50,0.85);
-      border-color: #e08080;
+      background: rgba(220,80,100,0.7);
+      border-color: #ff8080;
+      color: #fff;
       transform: scale(1.1);
     }
 
@@ -76,7 +77,7 @@
 
     .header h1 {
       font-size: 22px;
-      color: #e8d7ad;
+      color: #c03050;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -85,23 +86,23 @@
 
     .header p {
       font-size: 13px;
-      color: #7a6a4a;
+      color: #c08090;
       margin-top: 6px;
     }
 
     .card {
-      background: linear-gradient(180deg, rgba(22,22,22,0.9) 0%, rgba(14,14,14,0.95) 100%);
+      background: rgba(255,255,255,0.85);
       border-radius: 16px;
       padding: 20px;
-      border: 1px solid rgba(189,161,102,0.3);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,223,154,0.08);
+      border: 1px solid rgba(255,160,185,0.3);
+      box-shadow: 0 4px 20px rgba(255,140,170,0.1), inset 0 1px 0 rgba(255,255,255,0.9);
       margin-bottom: 16px;
     }
 
     .card-title {
       font-size: 14px;
       font-weight: 600;
-      color: #e8d7ad;
+      color: #c03050;
       margin-bottom: 16px;
       display: flex;
       align-items: center;
@@ -119,7 +120,7 @@
     .form-group label {
       display: block;
       font-size: 13px;
-      color: #9a8a6a;
+      color: #a06070;
       margin-bottom: 6px;
     }
 
@@ -128,30 +129,31 @@
     .form-group textarea {
       width: 100%;
       padding: 10px 12px;
-      border: 1px solid rgba(189,161,102,0.3);
+      border: 1px solid rgba(255,160,185,0.35);
       border-radius: 10px;
       font-size: 14px;
       transition: border-color 0.2s, background 0.2s;
-      background: rgba(15,15,15,0.9);
-      color: #e8d7ad;
+      background: rgba(255,255,255,0.9);
+      color: #5a3a4a;
     }
 
     .form-group input:focus,
     .form-group select:focus,
     .form-group textarea:focus {
       outline: none;
-      border-color: #c9a84c;
-      background: rgba(20,20,20,0.95);
+      border-color: #FF9AAF;
+      background: rgba(255,255,255,1);
+      box-shadow: 0 0 0 2px rgba(255,160,185,0.2);
     }
 
     .form-group input::placeholder,
     .form-group textarea::placeholder {
-      color: rgba(180,155,100,0.45);
+      color: rgba(192,96,120,0.45);
     }
 
     .form-group select option {
-      background: #111111;
-      color: #e8d7ad;
+      background: #fff5f7;
+      color: #5a3a4a;
     }
 
     .form-group textarea {
@@ -166,22 +168,22 @@
     .btn-save {
       width: 100%;
       padding: 14px;
-      background: linear-gradient(135deg, #5b4a2d 0%, #46381f 100%);
-      border: 1px solid #bca26a;
+      background: linear-gradient(135deg, #FFB7C5 0%, #FF9AAF 100%);
+      border: 1px solid #FF9AAF;
       border-radius: 12px;
-      color: #f1e5c7;
+      color: #fff;
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
-      box-shadow: inset 0 1px 0 rgba(255,238,193,0.2), 0 4px 14px rgba(0,0,0,0.4);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 14px rgba(255,140,170,0.25);
     }
 
     .btn-save:hover {
       transform: translateY(-1px);
-      border-color: #d5bc86;
-      background: linear-gradient(135deg, #665434 0%, #4f3f24 100%);
-      box-shadow: inset 0 1px 0 rgba(255,238,193,0.25), 0 6px 18px rgba(0,0,0,0.45);
+      border-color: #FF80A0;
+      background: linear-gradient(135deg, #FF9AAF 0%, #FF7A9A 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 6px 18px rgba(255,140,170,0.35);
     }
 
     .btn-save:active {
@@ -189,9 +191,9 @@
     }
 
     .btn-save.saved {
-      background: linear-gradient(135deg, #2a4a2a 0%, #1e3a1e 100%);
-      border-color: #6a9a6a;
-      box-shadow: inset 0 1px 0 rgba(150,220,150,0.15), 0 4px 14px rgba(0,0,0,0.4);
+      background: linear-gradient(135deg, #a8d8a8 0%, #88c888 100%);
+      border-color: #88c888;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 4px 14px rgba(100,200,100,0.2);
     }
 
     .toast {
@@ -199,15 +201,16 @@
       top: 20px;
       left: 50%;
       transform: translateX(-50%) translateY(-20px);
-      background: linear-gradient(180deg, rgba(25,25,25,0.97) 0%, rgba(15,15,15,0.97) 100%);
-      border: 1px solid rgba(189,161,102,0.5);
-      color: #e8d7ad;
+      background: rgba(255,255,255,0.97);
+      border: 1px solid rgba(255,160,185,0.5);
+      color: #c03050;
       padding: 10px 20px;
       border-radius: 20px;
       font-size: 13px;
       opacity: 0;
       transition: all 0.3s;
       z-index: 1000;
+      box-shadow: 0 4px 20px rgba(255,140,170,0.2);
     }
 
     .toast.show {
@@ -219,8 +222,8 @@
       width: 60px;
       height: 60px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #5b4a2d 0%, #46381f 100%);
-      border: 1px solid #bca26a;
+      background: linear-gradient(135deg, #FFB7C5 0%, #FF9AAF 100%);
+      border: 1px solid #FF9AAF;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -230,7 +233,7 @@
 
     .constellation-hint {
       font-size: 11px;
-      color: #7a6a4a;
+      color: #c08090;
       margin-top: 4px;
     }
   </style>
