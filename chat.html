@@ -985,6 +985,8 @@
     }
 
     /* ===== 黑金主题 ===== */
+    /* 防止 FOUC：html 类在 <head> 内联脚本里提前设置，body.theme-dark 由 JS initTheme 同步添加 */
+    html.theme-dark { background: #100c02; }
     body.theme-dark {
       background:
         radial-gradient(circle at 75% 35%, rgba(27, 25, 20, 0.06) 0%, transparent 45%),
@@ -1353,8 +1355,10 @@
     }
 
   </style>
+  <script>if(localStorage.getItem('monkey_theme')==='dark'){document.documentElement.classList.add('theme-dark')}</script>
 </head>
 <body>
+  <script>if(localStorage.getItem('monkey_theme')==='dark'){document.body.classList.add('theme-dark')}</script>
   <!-- 主区域：立绘铺满背景，内部分栏 -->
   <div class="main">
     <!-- 顶部标题栏（跨越全宽） -->
@@ -1390,7 +1394,8 @@
 
     <!-- 竹影摇曳层（纹理与立绘之间） -->
     <div class="character-texture-bg">
-      <img class="sway-img" id="bgImg" src="bg.png" alt="">
+      <img class="sway-img" id="bgImg" src="" alt="">
+      <script>document.getElementById('bgImg').src=localStorage.getItem('monkey_theme')==='dark'?'bg1.png':'bg.png'</script>
     </div>
 
     <!-- 花瓣飘落层 -->
@@ -2760,7 +2765,9 @@ ${extraContext}
 
     function saveMood(mood) {
       const logs = JSON.parse(localStorage.getItem(MOOD_KEY) || '[]');
-      logs.unshift({ mood, time: new Date().toISOString(), note: '' });
+      const now = new Date();
+      const localTime = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+      logs.unshift({ mood, time: localTime, note: '' });
       if (logs.length > 200) logs.splice(200);
       localStorage.setItem(MOOD_KEY, JSON.stringify(logs));
     }
