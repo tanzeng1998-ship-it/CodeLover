@@ -464,6 +464,297 @@
       padding: 20px;
       font-size: 12px;
     }
+    /* ===== 礼物按钮 ===== */
+    .gift-btn {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(189,161,102,0.6);
+      background: linear-gradient(135deg, rgba(95,72,35,0.85) 0%, rgba(55,42,18,0.9) 100%);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.25s;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255,220,120,0.2), 0 3px 10px rgba(0,0,0,0.35);
+    }
+    .gift-btn:hover {
+      transform: scale(1.08);
+      border-color: #d8c18d;
+      background: linear-gradient(135deg, rgba(110,84,42,0.9) 0%, rgba(68,52,24,0.95) 100%);
+    }
+    /* ===== 音乐播放器弹窗 ===== */
+    .music-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2000;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .music-modal.show { opacity: 1; pointer-events: auto; }
+    .music-modal .modal-content {
+      background: linear-gradient(180deg, #1a1a1a 0%, #111111 100%);
+      color: #e8d7ad;
+      padding: 26px 28px;
+      border-radius: 20px;
+      width: 420px;
+      max-width: 90vw;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,223,154,0.07);
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      border: 1px solid rgba(189,161,102,0.4);
+    }
+    .music-modal.show .modal-content { transform: scale(1); }
+    .music-modal .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 18px;
+    }
+    .music-modal .modal-header h3 {
+      font-size: 16px; margin: 0; color: #e8d7ad;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .music-modal .modal-close {
+      background: rgba(80,60,30,0.5);
+      border: 1px solid rgba(189,161,102,0.4);
+      color: #c8b48a; font-size: 16px; cursor: pointer;
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; transition: all 0.2s;
+    }
+    .music-modal .modal-close:hover { background: rgba(120,40,40,0.7); border-color: #e08080; color: #f1d9d9; }
+    .music-search {
+      display: flex; gap: 8px; margin-bottom: 16px;
+    }
+    .music-search input {
+      flex: 1; padding: 10px 14px;
+      border: 1px solid rgba(189,161,102,0.4); border-radius: 20px;
+      background: rgba(20,20,20,0.8); color: #f2e7cb; font-size: 13px; outline: none;
+    }
+    .music-search input::placeholder { color: rgba(200,180,130,0.5); }
+    .music-search input:focus { border-color: #d8c18d; box-shadow: 0 0 0 2px rgba(186,160,101,0.2); }
+    .music-search button {
+      padding: 10px 16px;
+      background: linear-gradient(180deg, #5b4a2d 0%, #46381f 100%);
+      border: 1px solid #bca26a; border-radius: 20px;
+      color: #f1e5c7; font-size: 13px; cursor: pointer; transition: all 0.2s;
+      box-shadow: inset 0 1px 0 rgba(255,238,193,0.2);
+    }
+    .music-search button:hover { background: linear-gradient(180deg, #665434 0%, #4f3f24 100%); }
+    .music-search button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .music-list {
+      max-height: 260px; overflow-y: auto; margin-bottom: 16px;
+    }
+    .music-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px; cursor: pointer;
+      transition: all 0.2s; margin-bottom: 6px;
+      border: 1px solid transparent;
+    }
+    .music-item:hover { background: rgba(189,161,102,0.08); border-color: rgba(189,161,102,0.2); }
+    .music-item.playing { background: rgba(189,161,102,0.12); border-color: rgba(189,161,102,0.35); }
+    .music-item .cover {
+      width: 44px; height: 44px; border-radius: 8px;
+      background: linear-gradient(135deg, rgba(40,30,15,0.9) 0%, rgba(25,18,8,0.95) 100%);
+      border: 1px solid rgba(189,161,102,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .music-item .info { flex: 1; min-width: 0; }
+    .music-item .title {
+      font-size: 13px; color: #e8d7ad;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px;
+    }
+    .music-item .artist {
+      font-size: 11px; color: rgba(200,180,130,0.6);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .music-item .play-icon {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, rgba(95,72,35,0.85) 0%, rgba(55,42,18,0.9) 100%);
+      border: 1px solid rgba(189,161,102,0.5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: #f1e5c7; flex-shrink: 0; transition: transform 0.2s;
+    }
+    .music-item:hover .play-icon { transform: scale(1.08); }
+    .music-player-bar {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px;
+      background: rgba(20,20,20,0.7);
+      border-radius: 12px; border: 1px solid rgba(189,161,102,0.3);
+    }
+    .music-player-bar .cover {
+      width: 44px; height: 44px; border-radius: 8px;
+      background: linear-gradient(135deg, rgba(95,72,35,0.9) 0%, rgba(55,42,18,0.95) 100%);
+      border: 1px solid rgba(189,161,102,0.4);
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .music-player-bar .info { flex: 1; min-width: 0; }
+    .music-player-bar .title {
+      font-size: 13px; color: #e8d7ad;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px;
+    }
+    .music-player-bar .artist { font-size: 11px; color: rgba(200,180,130,0.6); }
+    .music-player-bar .controls { display: flex; gap: 8px; }
+    .music-player-bar .control-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 1px solid rgba(189,161,102,0.4);
+      background: rgba(40,30,15,0.7); color: #c8b48a; font-size: 12px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .music-player-bar .control-btn:hover { background: rgba(95,72,35,0.7); border-color: #d8c18d; }
+    .music-player-bar .control-btn.play {
+      background: linear-gradient(135deg, #5b4a2d 0%, #46381f 100%);
+      border-color: #bca26a; color: #f1e5c7;
+    }
+    .music-empty { text-align: center; color: rgba(200,180,130,0.5); padding: 30px 20px; font-size: 13px; }
+    .music-loading { text-align: center; color: rgba(200,180,130,0.6); padding: 20px; font-size: 13px; }
+    /* ===== 礼物选择弹窗 ===== */
+    .gift-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2000;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .gift-modal.show { opacity: 1; pointer-events: auto; }
+    .gift-modal .modal-content {
+      background: linear-gradient(180deg, #1a1a1a 0%, #111111 100%);
+      color: #e8d7ad;
+      padding: 26px 28px;
+      border-radius: 20px;
+      width: 420px;
+      max-width: 90vw;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,223,154,0.07);
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      border: 1px solid rgba(189,161,102,0.4);
+    }
+    .gift-modal.show .modal-content { transform: scale(1); }
+    .gift-modal .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px;
+    }
+    .gift-modal .modal-header h3 {
+      font-size: 16px; margin: 0; color: #e8d7ad;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .gift-modal .modal-close {
+      background: rgba(80,60,30,0.5);
+      border: 1px solid rgba(189,161,102,0.4);
+      color: #c8b48a; font-size: 16px; cursor: pointer;
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; transition: all 0.2s;
+    }
+    .gift-modal .modal-close:hover { background: rgba(120,40,40,0.7); border-color: #e08080; color: #f1d9d9; }
+    .gift-inventory {
+      max-height: 300px; overflow-y: auto;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 4px;
+    }
+    .gift-inventory-item {
+      background: linear-gradient(180deg, rgba(22,22,22,0.9) 0%, rgba(14,14,14,0.95) 100%);
+      border-radius: 14px; padding: 16px 10px; text-align: center;
+      cursor: pointer; transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+      border: 1px solid rgba(189,161,102,0.2); position: relative; overflow: hidden;
+    }
+    .gift-inventory-item::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, #c9a84c, #e8d7ad, #c9a84c);
+      transform: scaleX(0); transition: transform 0.3s;
+    }
+    .gift-inventory-item:hover::before { transform: scaleX(1); }
+    .gift-inventory-item:hover {
+      transform: translateY(-4px);
+      border-color: rgba(189,161,102,0.5);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 12px rgba(189,161,102,0.08);
+    }
+    .gift-inventory-item .emoji { font-size: 36px; margin-bottom: 8px; display: block; transition: transform 0.3s; }
+    .gift-inventory-item:hover .emoji { transform: scale(1.12); }
+    .gift-inventory-item .name { font-size: 12px; color: #e8d7ad; margin-bottom: 4px; font-weight: 600; }
+    .gift-inventory-item .count {
+      font-size: 11px; color: #c9a84c;
+      background: rgba(189,161,102,0.12); padding: 2px 8px;
+      border-radius: 10px; display: inline-block; font-weight: 600;
+      border: 1px solid rgba(189,161,102,0.25);
+    }
+    .gift-empty {
+      grid-column: 1 / -1; text-align: center;
+      color: rgba(200,180,130,0.5); padding: 40px 20px; font-size: 13px;
+      background: rgba(20,20,20,0.5); border-radius: 12px;
+      border: 1px dashed rgba(189,161,102,0.2);
+    }
+    .gift-empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; display: block; }
+    /* ===== 礼物消息气泡 ===== */
+    .message.user.gift {
+      background: linear-gradient(180deg, rgba(95,72,35,0.9) 0%, rgba(55,42,18,0.94) 100%);
+      border: 1px solid rgba(212,175,80,0.65);
+      color: #f5ecd4; align-self: flex-end; border-bottom-right-radius: 4px;
+      text-align: center; padding: 8px 12px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-width: 70px; box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+    }
+    .message.user.gift .gift-content { font-size: 28px; display: block; line-height: 1; }
+    .message.user.gift .gift-text { font-size: 11px; font-weight: 600; color: #e8d7ad; margin-top: 4px; display: block; }
+    /* ===== 音乐卡片消息 ===== */
+    .message.music-card {
+      background: linear-gradient(180deg, rgba(22,22,22,0.92) 0%, rgba(12,12,12,0.96) 100%) !important;
+      border: 1px solid rgba(189,161,102,0.4);
+      border-radius: 14px; padding: 10px !important;
+      width: 150px; height: 150px;
+      align-self: flex-end; border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,223,154,0.07);
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; position: relative; flex-shrink: 0; box-sizing: border-box;
+    }
+    .message.music-card .music-card-top {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      width: 100%; flex: 1; min-height: 0;
+    }
+    .message.music-card .music-card-bottom {
+      display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%;
+      padding-top: 6px; border-top: 1px solid rgba(189,161,102,0.2); flex-shrink: 0;
+    }
+    .message.music-card .music-icon {
+      width: 32px; height: 32px; border-radius: 6px;
+      background: linear-gradient(135deg, rgba(95,72,35,0.9) 0%, rgba(55,42,18,0.95) 100%);
+      border: 1px solid rgba(189,161,102,0.4);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .message.music-card .music-icon svg { display: block; width: 18px; height: 18px; }
+    .message.music-card .music-icon.playing { animation: musicPulse 1.5s ease-in-out infinite; }
+    @keyframes musicPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    .message.music-card .music-info { width: 100%; }
+    .message.music-card .music-title {
+      font-size: 13px; color: #e8d7ad; font-weight: 500;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.4;
+    }
+    .message.music-card .music-artist {
+      font-size: 9px; color: rgba(200,180,130,0.6);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;
+    }
+    .message.music-card .music-controls {
+      display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center;
+    }
+    .message.music-card .music-btn {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 1px solid rgba(189,161,102,0.35);
+      background: rgba(30,22,10,0.7);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; padding: 0; flex-shrink: 0;
+    }
+    .message.music-card .music-btn svg { display: block; width: 12px; height: 12px; pointer-events: none; }
+    .message.music-card .music-btn:hover { background: rgba(95,72,35,0.7); border-color: #d8c18d; }
+    .message.music-card .music-btn.play {
+      background: linear-gradient(135deg, rgba(95,72,35,0.9) 0%, rgba(55,42,18,0.95) 100%);
+      border-color: #bca26a;
+    }
+    .message.music-card .music-status { font-size: 9px; color: #c9a84c; text-align: center; line-height: 1; }
     /* ===== 养成系统UI ===== */
     .progression-panel {
       padding: 14px 16px;
@@ -669,6 +960,8 @@
       <div class="header-left" id="headerLeft"></div>
       <div class="header-actions">
         <button class="action-btn" onclick="openSettings()">⚙️</button>
+        <button class="action-btn" onclick="openShop()">🛒</button>
+        <button class="action-btn" onclick="openMusicPlayer()">🎵</button>
         <button class="action-btn" onclick="openDiary()">📖</button>
         <button class="action-btn" onclick="openGame()">🎮</button>
         <button class="close-btn" onclick="window.close()" title="关闭">✕</button>
@@ -716,6 +1009,51 @@
             <div class="sub" id="breakupSub"></div>
           </div>
         </div>
+        <!-- 音乐播放器弹窗 -->
+        <div class="music-modal" id="musicModal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>🎵 一起听歌</h3>
+              <button class="modal-close" onclick="closeMusicPlayer()">×</button>
+            </div>
+            <div class="music-search">
+              <input type="text" id="musicSearchInput" placeholder="搜索歌曲或歌手..." onkeypress="handleMusicSearchKeyPress(event)">
+              <button onclick="searchMusic()" id="musicSearchBtn">搜索</button>
+            </div>
+            <div class="music-list" id="musicList">
+              <div class="music-empty">输入关键词搜索歌曲</div>
+            </div>
+            <div class="music-player-bar" id="musicPlayerBar" style="display: none;">
+              <div class="cover">🎵</div>
+              <div class="info">
+                <div class="title" id="currentMusicTitle">--</div>
+                <div class="artist" id="currentMusicArtist">--</div>
+              </div>
+              <div class="controls">
+                <button class="control-btn play" onclick="togglePlay()" id="playBtn">▶</button>
+                <button class="control-btn" onclick="stopMusic()">⏹</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 礼物选择弹窗 -->
+        <div class="gift-modal" id="giftModal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>🎁 赠送礼物</h3>
+              <button class="modal-close" onclick="closeGiftModal()">×</button>
+            </div>
+            <div class="gift-inventory" id="giftInventory">
+              <div class="gift-empty">
+                <span class="gift-empty-icon">🎁</span>
+                <div>背包是空的</div>
+                <div style="font-size: 11px; margin-top: 6px; opacity: 0.7;">去商店买点礼物吧~</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 音频播放器 -->
+        <audio id="audioPlayer" preload="none"></audio>
         <div class="chat-container" id="chatContainer">
           <div class="welcome">
             <div class="emoji">👋</div>
@@ -731,6 +1069,7 @@
           </div>
         </div>
         <div class="input-area">
+          <button class="gift-btn" onclick="openGiftModal()" title="赠送礼物">🎁</button>
           <input type="text" id="messageInput" placeholder="输入消息..." onkeypress="handleKeyPress(event)">
           <button class="send-btn" onclick="sendMessage()">发送</button>
         </div>
@@ -1257,6 +1596,37 @@ ${extraContext}
     let _lastRenderedCount = 0;
 
     function createMessageEl(m) {
+      if (m.type === 'gift' && m.gift) {
+        const el = document.createElement('div');
+        el.className = 'message user gift';
+        el.innerHTML = `<span class="gift-content">${m.gift.emoji || '🎁'}</span><span class="gift-text">${m.gift.name || '神秘礼物'}</span>`;
+        return el;
+      }
+      if (m.type === 'music' && m.music) {
+        const el = document.createElement('div');
+        el.className = 'message music-card';
+        el.dataset.musicId = m.music.id;
+        const isPlaying = m.music.isPlaying;
+        const playIcon = isPlaying
+          ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="#e8d7ad"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
+          : '<svg width="14" height="14" viewBox="0 0 24 24" fill="#e8d7ad"><polygon points="5,3 19,12 5,21"/></svg>';
+        const stopIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="#e8d7ad"><rect x="4" y="4" width="16" height="16"/></svg>';
+        el.innerHTML = `
+          <div class="music-card-top">
+            <div class="music-info">
+              <div class="music-title">${escapeHtml(m.music.name)}</div>
+              <div class="music-artist">${escapeHtml(m.music.artist || '')}</div>
+            </div>
+          </div>
+          <div class="music-card-bottom">
+            <div class="music-controls">
+              <button class="music-btn ${isPlaying ? '' : 'play'}" onclick="toggleMusicCard('${m.music.id}')">${playIcon}</button>
+              <button class="music-btn" onclick="stopMusicCard('${m.music.id}')">${stopIcon}</button>
+            </div>
+            <div class="music-status">${isPlaying ? '正在播放' : '已暂停'}</div>
+          </div>`;
+        return el;
+      }
       const el = document.createElement('div');
       el.className = `message ${m.role === 'assistant' ? 'ai' : m.role}`;
       el.textContent = m.content;
@@ -1353,6 +1723,8 @@ ${extraContext}
           }
           updateProgressionUI();
         }
+        // 发送消息获得金币
+        addCoins(2, '发送消息');
       }
 
       // 确保有会话
@@ -1411,6 +1783,8 @@ ${extraContext}
             currentSession.updatedAt = Date.now();
             saveSessions();
             renderMessages();
+            // 收到回复获得金币
+            addCoins(3, '收到回复');
           }
         } else {
           loadingMsg.textContent = '嗯...出了点问题';
@@ -1447,6 +1821,360 @@ ${extraContext}
     function openGame() {
       const { ipcRenderer } = require('electron');
       ipcRenderer.send('open-game');
+    }
+
+    // ===== 打开商店窗口 =====
+    function openShop() {
+      const { ipcRenderer } = require('electron');
+      ipcRenderer.send('open-shop');
+    }
+
+    // ===== 金币系统 =====
+    const COIN_KEY = 'monkey_coins';
+    const INVENTORY_KEY = 'monkey_inventory';
+    const INCOME_KEY = 'monkey_income';
+
+    function getCoins() {
+      const data = localStorage.getItem(COIN_KEY);
+      if (data) return JSON.parse(data);
+      return { amount: 100, lastUpdate: Date.now() };
+    }
+
+    function saveCoins(coins) {
+      localStorage.setItem(COIN_KEY, JSON.stringify(coins));
+    }
+
+    function addCoins(amount, source) {
+      const coins = getCoins();
+      coins.amount += amount;
+      coins.lastUpdate = Date.now();
+      saveCoins(coins);
+      const today = new Date().toDateString();
+      const incomeData = localStorage.getItem(INCOME_KEY);
+      let income = { date: today, amount: 0 };
+      if (incomeData) {
+        income = JSON.parse(incomeData);
+        if (income.date !== today) income = { date: today, amount: 0 };
+      }
+      income.amount += amount;
+      localStorage.setItem(INCOME_KEY, JSON.stringify(income));
+      const logs = JSON.parse(localStorage.getItem('monkey_coin_logs') || '[]');
+      logs.unshift({ amount, source, time: new Date().toISOString() });
+      if (logs.length > 100) logs.pop();
+      localStorage.setItem('monkey_coin_logs', JSON.stringify(logs));
+      return coins.amount;
+    }
+
+    // ===== 礼物系统 =====
+    const GIFTS_DATA = {
+      'rose':      { id: 'rose',      emoji: '🌹', name: '红玫瑰',   desc: '代表热烈的爱意', price: 50,  affection: 10  },
+      'chocolate': { id: 'chocolate', emoji: '🍫', name: '巧克力',   desc: '甜蜜的滋味',     price: 30,  affection: 5   },
+      'coffee':    { id: 'coffee',    emoji: '☕', name: '咖啡',     desc: '提神醒脑',       price: 20,  affection: 3   },
+      'book':      { id: 'book',      emoji: '📖', name: '书籍',     desc: '知识的礼物',     price: 80,  affection: 15  },
+      'music':     { id: 'music',     emoji: '🎵', name: '音乐盒',   desc: '美妙的旋律',     price: 60,  affection: 8   },
+      'cat':       { id: 'cat',       emoji: '🐱', name: '猫咪玩偶', desc: '像墨墨一样可爱', price: 100, affection: 20  },
+      'star':      { id: 'star',      emoji: '⭐', name: '星星',     desc: '摘颗星星给你',   price: 150, affection: 25  },
+      'crown':     { id: 'crown',     emoji: '👑', name: '皇冠',     desc: '你是我的女王',   price: 200, affection: 35  },
+      'ring':      { id: 'ring',      emoji: '💍', name: '戒指',     desc: '永恒的承诺',     price: 500, affection: 100 }
+    };
+
+    function getInventory() {
+      const data = localStorage.getItem(INVENTORY_KEY);
+      if (data) {
+        const inventory = JSON.parse(data);
+        for (const [id, item] of Object.entries(inventory)) {
+          if (!item.gift || !item.gift.emoji) {
+            if (GIFTS_DATA[id]) item.gift = { ...GIFTS_DATA[id] };
+          }
+        }
+        return inventory;
+      }
+      return {};
+    }
+
+    function saveInventory(inventory) {
+      localStorage.setItem(INVENTORY_KEY, JSON.stringify(inventory));
+    }
+
+    function openGiftModal() {
+      renderGiftInventory();
+      document.getElementById('giftModal').classList.add('show');
+    }
+
+    function closeGiftModal() {
+      document.getElementById('giftModal').classList.remove('show');
+    }
+
+    function renderGiftInventory() {
+      const inventory = getInventory();
+      const container = document.getElementById('giftInventory');
+      const items = Object.entries(inventory).filter(([_, item]) => item.count > 0);
+      if (items.length === 0) {
+        container.innerHTML = `<div class="gift-empty"><span class="gift-empty-icon">🎁</span><div>背包是空的</div><div style="font-size:11px;margin-top:6px;opacity:0.7;">去商店买点礼物吧~</div></div>`;
+        return;
+      }
+      container.innerHTML = items.map(([id, item]) => `
+        <div class="gift-inventory-item" onclick="sendGift('${id}')">
+          <span class="emoji">${item.gift.emoji}</span>
+          <div class="name">${item.gift.name}</div>
+          <div class="count">x${item.count}</div>
+        </div>
+      `).join('');
+    }
+
+    async function sendGift(giftId) {
+      const inventory = getInventory();
+      if (!inventory[giftId] || inventory[giftId].count <= 0) return;
+      const gift = inventory[giftId].gift;
+      inventory[giftId].count--;
+      if (inventory[giftId].count <= 0) delete inventory[giftId];
+      saveInventory(inventory);
+      closeGiftModal();
+      if (!currentSessionId) createSession();
+      const session = getCurrentSession();
+      const giftData = { id: gift.id, emoji: gift.emoji, name: gift.name, desc: gift.desc, price: gift.price, affection: gift.affection || 5 };
+      session.messages.push({ role: 'user', content: `送你一个${gift.name} ${gift.emoji}`, type: 'gift', gift: giftData });
+      session.updatedAt = Date.now();
+      saveSessions();
+      renderMessages();
+      const affectionResult = addHiddenAffection(gift.affection || 5, `收到了${gift.name}`);
+      showAffectionGain(gift.affection || 5, `收到了${gift.name}`);
+      updateProgressionUI();
+      const loadingMsg = document.createElement('div');
+      loadingMsg.className = 'message ai loading';
+      loadingMsg.textContent = '嗯...';
+      chatContainer.appendChild(loadingMsg);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+          body: JSON.stringify({
+            model: 'glm-4-flash',
+            messages: [
+              { role: 'system', content: buildSystemPrompt() + `\n\n用户刚刚送了你一个礼物：${gift.name} ${gift.emoji}。${gift.desc}。请用温柔内敛的方式回应这份心意，表达感谢和开心。` },
+              ...session.messages.slice(-40).map(m => ({ role: m.role, content: m.content || `送你一个${m.gift?.name || '礼物'}` }))
+            ],
+            stream: false
+          })
+        });
+        const data = await response.json();
+        loadingMsg.remove();
+        if (data.choices && data.choices[0]) {
+          session.messages.push({ role: 'assistant', content: data.choices[0].message.content });
+          session.updatedAt = Date.now();
+          saveSessions();
+          renderMessages();
+        }
+      } catch (error) {
+        loadingMsg.remove();
+        console.error('Gift API Error:', error);
+      }
+    }
+
+    function showToast(message, type = '') {
+      const toast = document.createElement('div');
+      toast.className = 'toast ' + type;
+      toast.textContent = message;
+      toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:rgba(15,15,15,0.95);color:#e8d7ad;padding:10px 22px;border-radius:25px;font-size:13px;z-index:3000;opacity:0;transition:opacity 0.3s;border:1px solid rgba(189,161,102,0.3);';
+      if (type === 'success') toast.style.background = 'linear-gradient(135deg,rgba(40,80,40,0.95) 0%,rgba(30,60,30,0.95) 100%)';
+      if (type === 'error') toast.style.background = 'linear-gradient(135deg,rgba(80,30,30,0.95) 0%,rgba(60,20,20,0.95) 100%)';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.style.opacity = '1', 10);
+      setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2500);
+    }
+
+    // ===== 音乐播放器 =====
+    let currentMusic = null;
+    let isPlaying = false;
+    const audioPlayer = document.getElementById('audioPlayer');
+
+    function openMusicPlayer() {
+      document.getElementById('musicModal').classList.add('show');
+      document.getElementById('musicSearchInput').focus();
+    }
+
+    function closeMusicPlayer() {
+      document.getElementById('musicModal').classList.remove('show');
+    }
+
+    function handleMusicSearchKeyPress(e) {
+      if (e.key === 'Enter') searchMusic();
+    }
+
+    async function searchMusic() {
+      const keyword = document.getElementById('musicSearchInput').value.trim();
+      if (!keyword) return;
+      const btn = document.getElementById('musicSearchBtn');
+      const list = document.getElementById('musicList');
+      btn.disabled = true;
+      btn.textContent = '搜索中...';
+      list.innerHTML = '<div class="music-loading">正在搜索...</div>';
+      try {
+        const response = await fetch(`https://music.163.com/api/search/get?s=${encodeURIComponent(keyword)}&type=1&offset=0&total=true&limit=10`);
+        const data = await response.json();
+        if (data.result && data.result.songs && data.result.songs.length > 0) {
+          renderMusicList(data.result.songs);
+        } else {
+          list.innerHTML = '<div class="music-empty">未找到相关歌曲</div>';
+        }
+      } catch (error) {
+        list.innerHTML = '<div class="music-empty">搜索失败，请稍后重试</div>';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '搜索';
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function renderMusicList(songs) {
+      const list = document.getElementById('musicList');
+      list.innerHTML = songs.map(song => `
+        <div class="music-item ${currentMusic && currentMusic.id === song.id ? 'playing' : ''}" onclick="playMusic(${song.id}, '${escapeHtml(song.name)}', '${escapeHtml(song.artists[0].name)}')">
+          <div class="cover">🎵</div>
+          <div class="info">
+            <div class="title">${escapeHtml(song.name)}</div>
+            <div class="artist">${escapeHtml(song.artists[0].name)}</div>
+          </div>
+          <div class="play-icon">${currentMusic && currentMusic.id === song.id && isPlaying ? '⏸' : '▶'}</div>
+        </div>
+      `).join('');
+    }
+
+    function playMusic(songId, songName, artistName) {
+      if (currentMusic && currentMusic.id === songId) { togglePlay(); return; }
+      const musicUrl = `https://music.163.com/song/media/outer/url?id=${songId}.mp3`;
+      currentMusic = { id: songId, name: songName, artist: artistName, url: musicUrl };
+      audioPlayer.src = musicUrl;
+      audioPlayer.play();
+      isPlaying = true;
+      document.getElementById('currentMusicTitle').textContent = songName;
+      document.getElementById('currentMusicArtist').textContent = artistName;
+      document.getElementById('musicPlayerBar').style.display = 'flex';
+      document.getElementById('playBtn').textContent = '⏸';
+      updateMusicListUI();
+      sendMusicCardMessage(songId, songName, artistName);
+      addCoins(8, '一起听歌');
+    }
+
+    function togglePlay() {
+      if (!currentMusic) return;
+      if (isPlaying) {
+        audioPlayer.pause(); isPlaying = false;
+        document.getElementById('playBtn').textContent = '▶';
+      } else {
+        audioPlayer.play(); isPlaying = true;
+        document.getElementById('playBtn').textContent = '⏸';
+      }
+      updateMusicListUI();
+      updateMusicCardStatus(currentMusic.id, isPlaying);
+    }
+
+    function stopMusic() {
+      const stoppedMusicId = currentMusic ? currentMusic.id : null;
+      audioPlayer.pause(); audioPlayer.currentTime = 0;
+      isPlaying = false; currentMusic = null;
+      document.getElementById('musicPlayerBar').style.display = 'none';
+      updateMusicListUI();
+      if (stoppedMusicId) updateMusicCardStatus(stoppedMusicId, false);
+    }
+
+    function updateMusicListUI() {
+      const items = document.querySelectorAll('.music-item');
+      items.forEach(item => {
+        const playIcon = item.querySelector('.play-icon');
+        if (currentMusic && item.onclick && item.onclick.toString().includes(currentMusic.id)) {
+          item.classList.add('playing');
+          if (playIcon) playIcon.textContent = isPlaying ? '⏸' : '▶';
+        } else {
+          item.classList.remove('playing');
+          if (playIcon) playIcon.textContent = '▶';
+        }
+      });
+    }
+
+    async function sendMusicCardMessage(songId, songName, artistName) {
+      if (!currentSessionId) createSession();
+      const session = getCurrentSession();
+      session.messages.push({ role: 'user', type: 'music', music: { id: songId, name: songName, artist: artistName, isPlaying: true } });
+      session.updatedAt = Date.now();
+      if (session.messages.length === 1) updateSessionTitle(`🎵 ${songName}`);
+      renderMessages();
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      const loadingMsg = document.createElement('div');
+      loadingMsg.className = 'message ai loading';
+      loadingMsg.textContent = '嗯...';
+      chatContainer.appendChild(loadingMsg);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+          body: JSON.stringify({
+            model: 'glm-4-flash',
+            messages: [
+              { role: 'system', content: buildSystemPrompt() + `\n\n用户正在和你一起听歌，当前播放的是《${songName}》- ${artistName}。请用温柔内敛的方式回应，可以简单分享对这首歌的感受，或者只是安静地陪伴。` },
+              ...session.messages.slice(-40).map(m => ({ role: m.role, content: m.type === 'music' ? `我们一起听《${m.music.name}》吧~` : (m.content || '') }))
+            ],
+            stream: false
+          })
+        });
+        const data = await response.json();
+        loadingMsg.remove();
+        if (data.choices && data.choices[0]) {
+          const currentSession = getCurrentSession();
+          if (currentSession) {
+            currentSession.messages.push({ role: 'assistant', content: data.choices[0].message.content });
+            currentSession.updatedAt = Date.now();
+            saveSessions();
+            renderMessages();
+          }
+        }
+      } catch (error) {
+        loadingMsg.remove();
+        console.error('Music API Error:', error);
+      }
+    }
+
+    audioPlayer.addEventListener('ended', () => {
+      isPlaying = false;
+      document.getElementById('playBtn').textContent = '▶';
+      updateMusicListUI();
+      if (currentMusic) updateMusicCardStatus(currentMusic.id, false);
+    });
+
+    function toggleMusicCard(songId) {
+      if (currentMusic && currentMusic.id === parseInt(songId)) {
+        togglePlay();
+        updateMusicCardStatus(songId, isPlaying);
+      } else {
+        const session = getCurrentSession();
+        if (session) {
+          const musicMsg = session.messages.find(m => m.type === 'music' && m.music && m.music.id === parseInt(songId));
+          if (musicMsg) playMusic(parseInt(songId), musicMsg.music.name, musicMsg.music.artist);
+        }
+      }
+    }
+
+    function stopMusicCard(songId) {
+      if (currentMusic && currentMusic.id === parseInt(songId)) stopMusic();
+      updateMusicCardStatus(songId, false);
+    }
+
+    function updateMusicCardStatus(songId, playing) {
+      const session = getCurrentSession();
+      if (!session) return;
+      session.messages.forEach(m => {
+        if (m.type === 'music' && m.music && m.music.id === parseInt(songId)) m.music.isPlaying = playing;
+      });
+      saveSessions();
+      _lastRenderedSessionId = null; // force re-render
+      renderMessages();
     }
 
     // ===== 心情记录功能 =====
@@ -1560,6 +2288,8 @@ ${extraContext}
           showAffectionGain(result.points, result.message);
           updateProgressionUI();
         }
+        // 记录心情获得金币
+        addCoins(5, '记录心情');
       });
     });
 

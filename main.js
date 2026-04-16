@@ -6,6 +6,7 @@ let diaryWin = null;
 let chatWin = null;
 let gameWin = null;
 let settingsWin = null;
+let shopWin = null;
 let isDragging = false;
 let dragOffset = { x: 0, y: 0 };
 
@@ -190,6 +191,11 @@ ipcMain.on('open-settings', () => {
   createSettingsWindow();
 });
 
+// 打开商店窗口
+ipcMain.on('open-shop', () => {
+  createShopWindow();
+});
+
 // 关闭子窗口
 ipcMain.on('close-diary', () => {
   if (diaryWin && !diaryWin.isDestroyed()) diaryWin.close();
@@ -228,4 +234,33 @@ function createSettingsWindow() {
   settingsWin.setMenuBarVisibility(false);
   settingsWin.loadFile('settings.html');
   settingsWin.on('closed', () => { settingsWin = null; });
+}
+
+function createShopWindow() {
+  if (shopWin && !shopWin.isDestroyed()) {
+    shopWin.focus();
+    return;
+  }
+  const { screen } = require('electron');
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
+  shopWin = new BrowserWindow({
+    width: 480,
+    height: 640,
+    frame: false,
+    transparent: false,
+    alwaysOnTop: false,
+    resizable: true,
+    title: '🛒 礼物商店',
+    x: Math.round((width - 480) / 2),
+    y: Math.round((height - 640) / 2),
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    }
+  });
+
+  shopWin.setMenuBarVisibility(false);
+  shopWin.loadFile('shop.html');
+  shopWin.on('closed', () => { shopWin = null; });
 }
