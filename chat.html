@@ -19,18 +19,23 @@
       display: flex;
       overflow: hidden;
     }
-    /* ===== 左侧：可折叠会话面板 ===== */
+    /* ===== 会话面板：常驻在立绘右侧、聊天框左侧 ===== */
     .session-panel {
-      width: 180px;
-      background: linear-gradient(180deg, rgba(18, 18, 18, 0.98) 0%, rgba(12, 12, 12, 0.99) 100%);
+      position: absolute;
+      top: 16px;
+      bottom: 24px;
+      right: calc(20px + 46% + 10px);
+      width: 155px;
+      z-index: 2;
+      background: rgba(10,10,10,0.62);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(189,161,102,0.32);
+      border-radius: 14px;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      border-right: 1px solid rgba(189, 161, 102, 0.45);
-      box-shadow: inset -1px 0 0 rgba(255, 221, 151, 0.12);
-      transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-      overflow: hidden;
-      flex-shrink: 0;
-      position: relative;
+      box-shadow: 0 6px 30px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,223,154,0.06);
     }
     /* 左下角金色光晕 */
     .session-panel::before {
@@ -38,104 +43,23 @@
       position: absolute;
       bottom: -40px;
       left: -40px;
-      width: 220px;
-      height: 220px;
+      width: 200px;
+      height: 200px;
       background: radial-gradient(circle at 30% 70%,
-        rgba(212, 175, 80, 0.22) 0%,
-        rgba(189, 140, 40, 0.10) 35%,
+        rgba(212, 175, 80, 0.18) 0%,
+        rgba(189, 140, 40, 0.08) 35%,
         transparent 70%
       );
       pointer-events: none;
       z-index: 0;
     }
-    /* 右侧边缘竖向金色光条 */
-    .session-panel::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      width: 1px;
-      height: 60%;
-      background: linear-gradient(180deg,
-        transparent 0%,
-        rgba(212, 175, 80, 0.35) 40%,
-        rgba(212, 175, 80, 0.55) 70%,
-        rgba(212, 175, 80, 0.2) 100%
-      );
-      pointer-events: none;
-      z-index: 0;
-    }
-    .session-panel.collapsed {
-      width: 32px;
-    }
-    .session-panel.collapsed .session-panel-content {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-    .session-panel-content {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      opacity: 1;
-      visibility: visible;
-      transition: opacity 0.22s, visibility 0.22s;
-    }
-    /* 折叠/展开按钮 */
-    .session-toggle {
-      position: absolute;
-      top: 10px;
-      right: 5px;
-      width: 22px;
-      height: 22px;
-      border-radius: 5px;
-      border: 1px solid rgba(189, 161, 102, 0.45);
-      background: rgba(20, 20, 20, 0.95);
-      color: #c8b48a;
-      font-size: 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      z-index: 10;
-    }
-    .session-toggle:hover {
-      background: rgba(96, 76, 43, 0.55);
-      border-color: #d5bc86;
-      color: #f0e2c2;
-    }
-    /* 折叠时竖排文字 */
-    .session-collapsed-hint {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      writing-mode: vertical-rl;
-      letter-spacing: 3px;
-      font-size: 11px;
-      color: #ae9b73;
-      cursor: pointer;
-      user-select: none;
-      padding-top: 40px;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.22s, visibility 0.22s;
-    }
-    .session-panel.collapsed .session-collapsed-hint {
-      opacity: 1;
-      visibility: visible;
-    }
     .session-panel-header {
-      padding: 11px 14px 11px 14px;
-      padding-right: 32px;
+      padding: 11px 14px;
       display: flex;
       align-items: center;
       gap: 8px;
       border-bottom: 1px solid rgba(189, 161, 102, 0.22);
+      flex-shrink: 0;
     }
     .session-panel-header span {
       color: #e8d7ad;
@@ -254,9 +178,9 @@
     .chat-col {
       position: absolute;
       top: 16px;
-      right: 24px;
+      right: 20px;
       bottom: 24px;
-      width: 52%;
+      width: 46%;
       display: flex;
       flex-direction: column;
       z-index: 2;
@@ -938,22 +862,7 @@
   </style>
 </head>
 <body>
-  <!-- 左：可折叠会话列表 -->
-  <div class="session-panel" id="sessionPanel">
-    <button class="session-toggle" id="sessionToggle" title="折叠/展开">◀</button>
-    <div class="session-collapsed-hint" onclick="toggleSessionPanel()">会话列表</div>
-    <div class="session-panel-content">
-      <div class="session-panel-header">
-        <span>💬 会话列表</span>
-      </div>
-      <button class="new-chat-btn" onclick="createSession()">✨ 新建会话</button>
-      <div class="session-list" id="sessionList">
-        <div class="empty-sidebar">暂无会话</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 主区域：立绘铺满背景，内部左右分栏 -->
+  <!-- 主区域：立绘铺满背景，内部分栏 -->
   <div class="main">
     <!-- 顶部标题栏（跨越全宽） -->
     <div class="header">
@@ -975,6 +884,17 @@
 
     <!-- 内容分栏 -->
     <div class="main-body">
+      <!-- 常驻会话列表：立绘右侧、聊天框左侧 -->
+      <div class="session-panel" id="sessionPanel">
+        <div class="session-panel-header">
+          <span>💬 会话列表</span>
+        </div>
+        <button class="new-chat-btn" onclick="createSession()">✨ 新建会话</button>
+        <div class="session-list" id="sessionList">
+          <div class="empty-sidebar">暂无会话</div>
+        </div>
+      </div>
+
       <!-- 左侧：亲密度面板 -->
       <div class="left-panel">
         <div class="progression-panel" id="progressionPanel">
@@ -2387,26 +2307,6 @@ ${extraContext}
     renderMessages();
     messageInput.focus();
 
-    // ===== 会话面板折叠/展开 =====
-    const SESSION_PANEL_KEY = 'session_panel_collapsed';
-    const sessionPanel = document.getElementById('sessionPanel');
-    const sessionToggleBtn = document.getElementById('sessionToggle');
-
-    function toggleSessionPanel() {
-      const collapsed = sessionPanel.classList.toggle('collapsed');
-      sessionToggleBtn.textContent = collapsed ? '▶' : '◀';
-      localStorage.setItem(SESSION_PANEL_KEY, collapsed ? '1' : '0');
-    }
-
-    sessionToggleBtn.addEventListener('click', toggleSessionPanel);
-
-    // 恢复上次状态（默认展开）
-    if (localStorage.getItem(SESSION_PANEL_KEY) === '1') {
-      sessionPanel.classList.add('collapsed');
-      sessionToggleBtn.textContent = '▶';
-    } else {
-      sessionToggleBtn.textContent = '◀';
-    }
   </script>
 </body>
 </html>
