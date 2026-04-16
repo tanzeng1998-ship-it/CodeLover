@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>⚙️ 个人设置</title>
+  <title>个人设置</title>
   <style>
     * {
       margin: 0;
@@ -236,16 +236,28 @@
       color: #c08090;
       margin-top: 4px;
     }
+    .svg-icon {
+      display: inline-block;
+      background-color: currentColor;
+      -webkit-mask-size: contain;
+      -webkit-mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      mask-size: contain;
+      mask-repeat: no-repeat;
+      mask-position: center;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
   <div class="titlebar">
-    <span class="titlebar-title">⚙️ 个人设置</span>
+    <span class="titlebar-title"><span class="svg-icon" style="width:14px;height:14px;-webkit-mask-image:url('svg/setting.svg');mask-image:url('svg/setting.svg');margin-right:6px"></span>个人设置</span>
     <button class="titlebar-close" id="closeBtn">✕</button>
   </div>
   <div class="container">
     <div class="header">
-      <h1>⚙️ 个人设置</h1>
+      <h1><span class="svg-icon" style="width:22px;height:22px;-webkit-mask-image:url('svg/setting.svg');mask-image:url('svg/setting.svg');margin-right:8px;color:#c03050"></span>个人设置</h1>
       <p>让我更了解你</p>
     </div>
 

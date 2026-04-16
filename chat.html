@@ -130,7 +130,7 @@
       transform-origin: bottom left;
       opacity: 0.5;
       mix-blend-mode: multiply;
-      animation: bambooSway 6s ease-in-out infinite;
+      /* animation: bambooSway 6s ease-in-out infinite; */
     }
     @keyframes bambooSway {
       0%   { transform: rotate(0deg); }
@@ -301,16 +301,34 @@
     .diary-link-btn:hover { background: rgba(255,160,185,0.5); }
     .header-actions { display: flex; gap: 8px; align-items: center; -webkit-app-region: no-drag; }
     .action-btn {
-      padding: 5px 12px;
+      width: 32px;
+      height: 32px;
+      padding: 0;
       background: rgba(255,183,197,0.35);
       border: 1px solid rgba(255,160,185,0.7);
-      border-radius: 15px;
-      color: #c03050;
-      font-size: 12px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
       transition: all 0.2s;
     }
-    .action-btn:hover { background: rgba(255,160,185,0.5); }
+    .action-btn:hover {
+      background: rgba(255,160,185,0.5);
+      transform: scale(1.08);
+    }
+    .action-btn .btn-icon {
+      width: 16px;
+      height: 16px;
+      background-color: #c03050;
+      -webkit-mask-size: contain;
+      -webkit-mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      mask-size: contain;
+      mask-repeat: no-repeat;
+      mask-position: center;
+      flex-shrink: 0;
+    }
     .chat-container {
       flex: 1;
       overflow-y: auto;
@@ -454,7 +472,6 @@
       border-radius: 50%;
       border: 1px solid rgba(255,160,185,0.6);
       background: linear-gradient(135deg, #FFB7C5 0%, #FF9AAF 100%);
-      font-size: 18px;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       transition: all 0.25s;
@@ -543,7 +560,21 @@
       background: linear-gradient(135deg, rgba(255,183,197,0.6) 0%, rgba(255,154,175,0.7) 100%);
       border: 1px solid rgba(255,160,185,0.35);
       display: flex; align-items: center; justify-content: center;
-      font-size: 18px; flex-shrink: 0;
+      flex-shrink: 0;
+    }
+    .music-item .cover::after {
+      content: '';
+      display: block;
+      width: 22px; height: 22px;
+      background-color: rgba(255,255,255,0.85);
+      -webkit-mask-image: url('svg/ic_music.svg');
+      mask-image: url('svg/ic_music.svg');
+      -webkit-mask-size: contain;
+      mask-size: contain;
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      mask-position: center;
     }
     .music-item .info { flex: 1; min-width: 0; }
     .music-item .title {
@@ -572,7 +603,21 @@
       width: 44px; height: 44px; border-radius: 8px;
       background: linear-gradient(135deg, #FFB7C5 0%, #FF9AAF 100%);
       border: 1px solid rgba(255,154,175,0.5);
-      display: flex; align-items: center; justify-content: center; font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .music-player-bar .cover::after {
+      content: '';
+      display: block;
+      width: 22px; height: 22px;
+      background-color: rgba(255,255,255,0.9);
+      -webkit-mask-image: url('svg/ic_music.svg');
+      mask-image: url('svg/ic_music.svg');
+      -webkit-mask-size: contain;
+      mask-size: contain;
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      mask-position: center;
     }
     .music-player-bar .info { flex: 1; min-width: 0; }
     .music-player-bar .title {
@@ -673,7 +718,7 @@
       background: rgba(255,240,245,0.6); border-radius: 12px;
       border: 1px dashed rgba(255,160,185,0.3);
     }
-    .gift-empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; display: block; }
+    .gift-empty-icon { width: 44px; height: 44px; margin: 0 auto 12px; opacity: 0.45; display: block; background-color: #c03050; -webkit-mask-image: url('svg/gift.svg'); mask-image: url('svg/gift.svg'); -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
     /* ===== 礼物消息气泡 ===== */
     .message.user.gift {
       background: linear-gradient(180deg, #FFB7C5 0%, #FF9AAF 100%);
@@ -690,15 +735,15 @@
       background: rgba(255,255,255,0.9) !important;
       border: 1px solid rgba(255,160,185,0.45);
       border-radius: 14px; padding: 10px !important;
-      width: 150px; height: 150px;
+      width: 150px; height: auto;
       align-self: flex-end; border-bottom-right-radius: 4px;
       box-shadow: 0 4px 20px rgba(255,140,170,0.18), inset 0 1px 0 rgba(255,255,255,0.9);
       display: flex; flex-direction: column; align-items: center;
       text-align: center; position: relative; flex-shrink: 0; box-sizing: border-box;
     }
     .message.music-card .music-card-top {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      width: 100%; flex: 1; min-height: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+      width: 100%; flex: 0 0 auto; min-height: 0;
     }
     .message.music-card .music-card-bottom {
       display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%;
@@ -713,14 +758,21 @@
     .message.music-card .music-icon svg { display: block; width: 18px; height: 18px; }
     .message.music-card .music-icon.playing { animation: musicPulse 1.5s ease-in-out infinite; }
     @keyframes musicPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-    .message.music-card .music-info { width: 100%; }
+    .message.music-card .music-info {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
     .message.music-card .music-title {
       font-size: 13px; color: #5a3a4a; font-weight: 500;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.4;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.15;
+      margin: 12px 0 0 0;
     }
     .message.music-card .music-artist {
       font-size: 9px; color: rgba(160,80,100,0.65);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1;
+      margin: 0 0 12px 0;
     }
     .message.music-card .music-controls {
       display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center;
@@ -928,11 +980,21 @@
     <div class="header">
       <div class="header-left" id="headerLeft"></div>
       <div class="header-actions">
-        <button class="action-btn" onclick="openSettings()">⚙️</button>
-        <button class="action-btn" onclick="openShop()">🛒</button>
-        <button class="action-btn" onclick="openMusicPlayer()">🎵</button>
-        <button class="action-btn" onclick="openDiary()">📖</button>
-        <button class="action-btn" onclick="openGame()">🎮</button>
+        <button class="action-btn" onclick="openSettings()" title="设置">
+          <span class="btn-icon" style="-webkit-mask-image:url('svg/setting.svg');mask-image:url('svg/setting.svg')"></span>
+        </button>
+        <button class="action-btn" onclick="openShop()" title="商店">
+          <span class="btn-icon" style="-webkit-mask-image:url('svg/shopping.svg');mask-image:url('svg/shopping.svg')"></span>
+        </button>
+        <button class="action-btn" onclick="openMusicPlayer()" title="音乐">
+          <span class="btn-icon" style="-webkit-mask-image:url('svg/ic_music.svg');mask-image:url('svg/ic_music.svg')"></span>
+        </button>
+        <button class="action-btn" onclick="openDiary()" title="日记">
+          <span class="btn-icon" style="-webkit-mask-image:url('svg/book.svg');mask-image:url('svg/book.svg')"></span>
+        </button>
+        <button class="action-btn" onclick="openGame()" title="游戏">
+          <span class="btn-icon" style="-webkit-mask-image:url('svg/game.svg');mask-image:url('svg/game.svg')"></span>
+        </button>
         <button class="close-btn" onclick="window.close()" title="关闭">✕</button>
       </div>
     </div>
@@ -1008,7 +1070,7 @@
         <div class="music-modal" id="musicModal">
           <div class="modal-content">
             <div class="modal-header">
-              <h3>🎵 一起听歌</h3>
+              <h3><span style="display:inline-block;width:18px;height:18px;background-color:#c03050;-webkit-mask-image:url('svg/ic_music.svg');mask-image:url('svg/ic_music.svg');-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;vertical-align:middle;margin-right:6px"></span>一起听歌</h3>
               <button class="modal-close" onclick="closeMusicPlayer()">×</button>
             </div>
             <div class="music-search">
@@ -1019,7 +1081,7 @@
               <div class="music-empty">输入关键词搜索歌曲</div>
             </div>
             <div class="music-player-bar" id="musicPlayerBar" style="display: none;">
-              <div class="cover">🎵</div>
+              <div class="cover"></div>
               <div class="info">
                 <div class="title" id="currentMusicTitle">--</div>
                 <div class="artist" id="currentMusicArtist">--</div>
@@ -1035,12 +1097,12 @@
         <div class="gift-modal" id="giftModal">
           <div class="modal-content">
             <div class="modal-header">
-              <h3>🎁 赠送礼物</h3>
+              <h3><span style="display:inline-block;width:18px;height:18px;background-color:#c03050;-webkit-mask-image:url('svg/gift.svg');mask-image:url('svg/gift.svg');-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;vertical-align:middle;margin-right:6px"></span>赠送礼物</h3>
               <button class="modal-close" onclick="closeGiftModal()">×</button>
             </div>
             <div class="gift-inventory" id="giftInventory">
               <div class="gift-empty">
-                <span class="gift-empty-icon">🎁</span>
+                <span class="gift-empty-icon"></span>
                 <div>背包是空的</div>
                 <div style="font-size: 11px; margin-top: 6px; opacity: 0.7;">去商店买点礼物吧~</div>
               </div>
@@ -1064,7 +1126,9 @@
           </div>
         </div>
         <div class="input-area">
-          <button class="gift-btn" onclick="openGiftModal()" title="赠送礼物">🎁</button>
+          <button class="gift-btn" onclick="openGiftModal()" title="赠送礼物">
+            <span style="display:block;width:20px;height:20px;background-color:white;-webkit-mask-image:url('svg/gift.svg');mask-image:url('svg/gift.svg');-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center"></span>
+          </button>
           <input type="text" id="messageInput" placeholder="输入消息..." onkeypress="handleKeyPress(event)">
           <button class="send-btn" onclick="sendMessage()">发送</button>
         </div>
@@ -1698,7 +1762,9 @@ ${extraContext}
       if (m.type === 'gift' && m.gift) {
         const el = document.createElement('div');
         el.className = 'message user gift';
-        el.innerHTML = `<span class="gift-content">${m.gift.emoji || '🎁'}</span><span class="gift-text">${m.gift.name || '神秘礼物'}</span>`;
+        el.innerHTML = m.gift.emoji
+          ? `<span class="gift-content">${m.gift.emoji}</span><span class="gift-text">${m.gift.name || '神秘礼物'}</span>`
+          : `<span class="gift-content"><span style="display:inline-block;width:28px;height:28px;background-color:rgba(255,255,255,0.9);-webkit-mask-image:url('svg/gift.svg');mask-image:url('svg/gift.svg');-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat"></span></span><span class="gift-text">${m.gift.name || '神秘礼物'}</span>`;
         return el;
       }
       if (m.type === 'music' && m.music) {
@@ -2009,7 +2075,7 @@ ${extraContext}
       const container = document.getElementById('giftInventory');
       const items = Object.entries(inventory).filter(([_, item]) => item.count > 0);
       if (items.length === 0) {
-        container.innerHTML = `<div class="gift-empty"><span class="gift-empty-icon">🎁</span><div>背包是空的</div><div style="font-size:11px;margin-top:6px;opacity:0.7;">去商店买点礼物吧~</div></div>`;
+        container.innerHTML = `<div class="gift-empty"><span class="gift-empty-icon"></span><div>背包是空的</div><div style="font-size:11px;margin-top:6px;opacity:0.7;">去商店买点礼物吧~</div></div>`;
         return;
       }
       container.innerHTML = items.map(([id, item]) => `
@@ -2135,7 +2201,7 @@ ${extraContext}
       const list = document.getElementById('musicList');
       list.innerHTML = songs.map(song => `
         <div class="music-item ${currentMusic && currentMusic.id === song.id ? 'playing' : ''}" onclick="playMusic(${song.id}, '${escapeHtml(song.name)}', '${escapeHtml(song.artists[0].name)}')">
-          <div class="cover">🎵</div>
+          <div class="cover"></div>
           <div class="info">
             <div class="title">${escapeHtml(song.name)}</div>
             <div class="artist">${escapeHtml(song.artists[0].name)}</div>
