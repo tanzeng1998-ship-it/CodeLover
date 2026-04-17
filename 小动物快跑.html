@@ -3054,6 +3054,17 @@
                 (stars >= 1 && gameState.currentLevel < LEVELS.length - 1) ? 'block' : 'none';
 
             showScreen('resultScreen');
+
+            // 通知聊天窗口游戏完成
+            const { ipcRenderer } = require('electron');
+            ipcRenderer.send('game-complete', {
+                passed: passed,
+                stars: stars,
+                score: gameState.score,
+                level: gameState.currentLevel + 1,
+                coins: coinsEarned,
+                captures: gameState.captures
+            });
         }
 
         function restartLevel() {

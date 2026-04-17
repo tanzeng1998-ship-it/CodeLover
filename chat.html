@@ -2508,6 +2508,33 @@ ${extraContext}
       ipcRenderer.send('open-shop');
     }
 
+    // ===== 游戏完成夸夸 =====
+    const { ipcRenderer } = require('electron');
+    ipcRenderer.on('game-complete', (event, gameData) => {
+      // 生成夸夸消息（以AI身份发送）
+      let praiseMsg = '';
+      if (gameData.passed) {
+        const starsText = '⭐'.repeat(gameData.stars || 0);
+        const levelText = `第${gameData.level}关`;
+        const scoreText = gameData.score || 0;
+        const coinsText = gameData.coins || 0;
+        praiseMsg = `哇，刚刚你通关了${levelText}！${starsText}\n获得${scoreText}分，还赚了${coinsText}金币~`;
+      } else {
+        praiseMsg = '虽然这关没通过，但我看到了你的努力呢~休息一下再来挑战吧';
+      }
+
+      // 确保有会话
+      if (!currentSessionId) {
+        createSession();
+      }
+      const session = getCurrentSession();
+      session.messages.push({ role: 'assistant', content: praiseMsg });
+      session.updatedAt = Date.now();
+      saveSessions();
+      renderMessages();
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    });
+
     // ===== 金币系统 =====
     const COIN_KEY = 'cyber_coins';
     const INVENTORY_KEY = 'cyber_inventory';

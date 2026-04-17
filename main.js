@@ -196,6 +196,13 @@ ipcMain.on('open-shop', () => {
   createShopWindow();
 });
 
+// 游戏完成通知 - 转发给聊天窗口
+ipcMain.on('game-complete', (event, gameData) => {
+  if (chatWin && !chatWin.isDestroyed()) {
+    chatWin.webContents.send('game-complete', gameData);
+  }
+});
+
 // 关闭子窗口
 ipcMain.on('close-diary', () => {
   if (diaryWin && !diaryWin.isDestroyed()) diaryWin.close();
