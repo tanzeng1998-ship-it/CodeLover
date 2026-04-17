@@ -47,15 +47,15 @@ function createDiaryWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
   diaryWin = new BrowserWindow({
-    width: 380,
-    height: 560,
+    width: 480,
+    height: 640,
     frame: false,
     transparent: false,
     alwaysOnTop: false,
     resizable: true,
     title: '🐵 心情日记',
-    x: Math.round((width - 380) / 2),
-    y: Math.round((height - 560) / 2),
+    x: Math.round((width - 480) / 2),
+    y: Math.round((height - 640) / 2),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -216,15 +216,15 @@ function createSettingsWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
   settingsWin = new BrowserWindow({
-    width: 360,
-    height: 480,
+    width: 480,
+    height: 640,
     frame: false,
     transparent: false,
     alwaysOnTop: false,
-    resizable: false,
+    resizable: true,
     title: '⚙️ 个人设置',
-    x: Math.round((width - 360) / 2),
-    y: Math.round((height - 480) / 2),
+    x: Math.round((width - 480) / 2),
+    y: Math.round((height - 640) / 2),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
