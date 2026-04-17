@@ -36,6 +36,84 @@
       display: flex;
       flex-direction: column;
       box-shadow: 0 6px 30px rgba(255,140,170,0.15), inset 0 1px 0 rgba(255,255,255,0.8);
+      transition: width 0.3s cubic-bezier(0.4,0,0.2,1), right 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease;
+    }
+    /* 折叠状态 */
+    .session-panel.collapsed {
+      width: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+    /* chat-col 展开过渡 */
+    .chat-col {
+      transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    /* chat-col 在 session-panel 折叠时扩展宽度 */
+    body.session-collapsed .chat-col {
+      width: calc(46% + 165px);
+    }
+    /* 折叠按钮 */
+    .session-toggle-btn {
+      margin-left: auto;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,160,185,0.5);
+      background: rgba(255,200,215,0.3);
+      color: #c0607a;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      flex-shrink: 0;
+      line-height: 1;
+      -webkit-app-region: no-drag;
+    }
+    .session-toggle-btn:hover {
+      background: rgba(255,160,185,0.45);
+    }
+    body.session-collapsed .session-toggle-btn {
+      transform: rotate(180deg);
+    }
+    /* chat-col 顶部栏：折叠时显示 */
+    .chat-col-header {
+      display: none;
+      align-items: center;
+      padding: 8px 14px;
+      border-bottom: 1px solid rgba(255,160,185,0.25);
+      background: rgba(255,245,248,0.6);
+      flex-shrink: 0;
+      -webkit-app-region: no-drag;
+      gap: 8px;
+    }
+    body.session-collapsed .chat-col-header {
+      display: flex;
+    }
+    .chat-col-expand-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,160,185,0.5);
+      background: rgba(255,200,215,0.35);
+      color: #c0607a;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .chat-col-expand-btn:hover {
+      background: rgba(255,160,185,0.45);
+    }
+    .chat-col-title {
+      color: #c0607a;
+      font-size: 13px;
+      font-weight: 600;
     }
     /* 左下角粉色光晕 */
     .session-panel::before {
@@ -1040,6 +1118,29 @@
     body.theme-dark .session-panel-header {
       border-bottom-color: rgba(160,130,50,0.15);
     }
+    body.theme-dark .session-toggle-btn {
+      border-color: rgba(160,130,50,0.45);
+      background: rgba(160,130,50,0.12);
+      color: #b89840;
+    }
+    body.theme-dark .session-toggle-btn:hover {
+      background: rgba(160,130,50,0.28);
+    }
+    body.theme-dark .chat-col-header {
+      background: rgba(15,10,2,0.8);
+      border-bottom-color: rgba(160,130,50,0.18);
+    }
+    body.theme-dark .chat-col-expand-btn {
+      background: rgba(160,130,50,0.12);
+      border-color: rgba(160,130,50,0.45);
+      color: #b89840;
+    }
+    body.theme-dark .chat-col-expand-btn:hover {
+      background: rgba(160,130,50,0.28);
+    }
+    body.theme-dark .chat-col-title {
+      color: #b89840;
+    }
     body.theme-dark .session-panel-header span { color: #b89840; }
     body.theme-dark .new-chat-btn {
       background: linear-gradient(180deg, #9a7c20 0%, #6a5410 100%);
@@ -1414,6 +1515,7 @@
       <div class="session-panel" id="sessionPanel">
         <div class="session-panel-header">
           <span>💬 会话列表</span>
+          <button class="session-toggle-btn" id="sessionToggleBtn" onclick="toggleSessionPanel()" title="折叠会话列表">‹</button>
         </div>
         <button class="new-chat-btn" onclick="createSession()">✨ 新建会话</button>
         <div class="session-list" id="sessionList">
@@ -1436,7 +1538,11 @@
       </div>
 
       <!-- 右侧：聊天框 -->
-      <div class="chat-col">
+      <div class="chat-col" id="chatCol">
+        <div class="chat-col-header">
+          <button class="chat-col-expand-btn" id="sessionExpandBtn" onclick="toggleSessionPanel()" title="展开会话列表">‹</button>
+          <span class="chat-col-title">Hello！</span>
+        </div>
         <div class="mood-toast" id="moodToast"></div>
         <div class="stage-up-toast" id="stageUpToast">
           <div id="stageUpText"></div>
@@ -1526,6 +1632,16 @@
   </div>
 
   <script>
+    // ===== 会话列表折叠/展开 =====
+    function toggleSessionPanel() {
+      const panel = document.getElementById('sessionPanel');
+      const btn = document.getElementById('sessionToggleBtn');
+      const isCollapsed = panel.classList.toggle('collapsed');
+      document.body.classList.toggle('session-collapsed', isCollapsed);
+      btn.classList.toggle('collapsed', isCollapsed);
+      btn.title = isCollapsed ? '展开会话列表' : '折叠会话列表';
+    }
+
     // ===== 花瓣飘落动画 =====
     (function() {
       const canvas = document.getElementById('petalCanvas');
