@@ -533,9 +533,9 @@
       { id: 'ring',      emoji: '💍', name: '戒指',     desc: '永恒的承诺',       price: 500, affection: 100 },
     ];
 
-    const COIN_KEY = 'monkey_coins';
-    const INVENTORY_KEY = 'monkey_inventory';
-    const INCOME_KEY = 'monkey_income';
+    const COIN_KEY = 'cyber_coins';
+    const INVENTORY_KEY = 'cyber_inventory';
+    const INCOME_KEY = 'cyber_income';
     let selectedGift = null;
 
     function getCoins() {
@@ -663,7 +663,7 @@
       }
     }
     function checkDailyLogin() {
-      const lastLoginKey = 'monkey_last_login';
+      const lastLoginKey = 'cyber_last_login';
       const today = new Date().toDateString();
       if (localStorage.getItem(lastLoginKey) !== today) {
         addCoins(50, '每日登录');
@@ -679,7 +679,7 @@
     setInterval(checkOnlineReward, 60000);
 
     // 同步主题
-    if (localStorage.getItem('monkey_theme') === 'dark') {
+    if (localStorage.getItem('cyber_theme') === 'dark') {
       document.body.classList.add('theme-dark');
     }
   </script>

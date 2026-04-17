@@ -1456,10 +1456,10 @@
     }
 
   </style>
-  <script>if(localStorage.getItem('monkey_theme')==='dark'){document.documentElement.classList.add('theme-dark')}</script>
+  <script>if(localStorage.getItem('cyber_theme')==='dark'){document.documentElement.classList.add('theme-dark')}</script>
 </head>
 <body>
-  <script>if(localStorage.getItem('monkey_theme')==='dark'){document.body.classList.add('theme-dark')}</script>
+  <script>if(localStorage.getItem('cyber_theme')==='dark'){document.body.classList.add('theme-dark')}</script>
   <!-- 主区域：立绘铺满背景，内部分栏 -->
   <div class="main">
     <!-- 顶部标题栏（跨越全宽） -->
@@ -1496,7 +1496,7 @@
     <!-- 竹影摇曳层（纹理与立绘之间） -->
     <div class="character-texture-bg">
       <img class="sway-img" id="bgImg" src="" alt="">
-      <script>document.getElementById('bgImg').src=localStorage.getItem('monkey_theme')==='dark'?'bg1.png':'bg.png'</script>
+      <script>document.getElementById('bgImg').src=localStorage.getItem('cyber_theme')==='dark'?'bg1.png':'bg.png'</script>
     </div>
 
     <!-- 花瓣飘落层 -->
@@ -1761,7 +1761,7 @@
       addHiddenAffection, addMemory, getMemory, checkMoodKeywords,
       applyPenalty, getMoodModifier, isReconciling, getReconciliationContext
     } = (function() {
-      const PROGRESSION_KEY = 'monkey_progression';
+      const PROGRESSION_KEY = 'cyber_progression';
       const STAGES = [
         { id: 1, name: '初识', min: 0, max: 100, color: '#E8E8E8' },
         { id: 2, name: '熟悉', min: 101, max: 300, color: '#B8D4E8' },
@@ -2083,8 +2083,8 @@
 
     const API_KEY = 'bb0937676c774d738cc49fa1914c4a29.DAMxFqJivtP6JpWI';
     const API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
-    const SESSION_KEY = 'monkey_chat_sessions';
-    const USER_PROFILE_KEY = 'monkey_user_profile';
+    const SESSION_KEY = 'cyber_chat_sessions';
+    const USER_PROFILE_KEY = 'cyber_user_profile';
 
     let currentSessionId = null;
     let sessions = [];
@@ -2509,9 +2509,9 @@ ${extraContext}
     }
 
     // ===== 金币系统 =====
-    const COIN_KEY = 'monkey_coins';
-    const INVENTORY_KEY = 'monkey_inventory';
-    const INCOME_KEY = 'monkey_income';
+    const COIN_KEY = 'cyber_coins';
+    const INVENTORY_KEY = 'cyber_inventory';
+    const INCOME_KEY = 'cyber_income';
 
     function getCoins() {
       const data = localStorage.getItem(COIN_KEY);
@@ -2537,10 +2537,10 @@ ${extraContext}
       }
       income.amount += amount;
       localStorage.setItem(INCOME_KEY, JSON.stringify(income));
-      const logs = JSON.parse(localStorage.getItem('monkey_coin_logs') || '[]');
+      const logs = JSON.parse(localStorage.getItem('cyber_coin_logs') || '[]');
       logs.unshift({ amount, source, time: new Date().toISOString() });
       if (logs.length > 100) logs.pop();
-      localStorage.setItem('monkey_coin_logs', JSON.stringify(logs));
+      localStorage.setItem('cyber_coin_logs', JSON.stringify(logs));
       return coins.amount;
     }
 
@@ -2865,7 +2865,7 @@ ${extraContext}
     }
 
     // ===== 心情记录功能 =====
-    const MOOD_KEY = 'monkey_mood_diary';
+    const MOOD_KEY = 'cyber_mood_diary';
     const moodConfig = {
       happy:   { emoji: '😊', label: '开心' },
       neutral: { emoji: '😐', label: '平和' },
@@ -2933,7 +2933,7 @@ ${extraContext}
       const moodData = JSON.parse(localStorage.getItem(MOOD_KEY) || '[]');
       const recentMoods = moodData.slice(0, 7);
 
-      const chatData = JSON.parse(localStorage.getItem('monkey_chat_sessions') || '{"sessions":[]}');
+      const chatData = JSON.parse(localStorage.getItem('cyber_chat_sessions') || '{"sessions":[]}');
       const recentSessions = chatData.sessions.slice(0, 3);
 
       let context = `用户刚记录了【${moodConfig[currentMood].label}】心情。\n\n`;
@@ -3057,7 +3057,7 @@ ${extraContext}
     }
 
     // ===== 换肤 =====
-    const THEME_KEY = 'monkey_theme';
+    const THEME_KEY = 'cyber_theme';
 
     function applyInlineIconColors(isDark) {
       // 将所有内联 style 中写死 #c03050 的 mask icon 动态切换颜色

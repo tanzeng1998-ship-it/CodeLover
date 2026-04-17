@@ -1,5 +1,5 @@
 // 养成系统 - 好感度与阶段管理（完整版）
-const PROGRESSION_KEY = 'monkey_progression';
+const PROGRESSION_KEY = 'cyber_progression';
 
 // 阶段定义
 const STAGES = [

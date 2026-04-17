@@ -1,7 +1,7 @@
 {
-  "name": "monkey-desktop-pet",
+  "name": "cyber-lover",
   "version": "1.0.0",
-  "description": "Cute monkey desktop pet",
+  "description": "AI virtual lover desktop pet",
   "main": "main.js",
   "scripts": {
     "start": "electron .",

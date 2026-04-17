@@ -1,7 +1,7 @@
 # 项目长期记忆
 
 ## 项目概览
-- Electron 桌面宠物 + AI 虚拟恋人养成应用（monkey-desktop-pet）
+- Electron 桌面宠物 + AI 虚拟恋人养成应用（cyber-lover）
 - AI 角色名：沈砚之（可自定义），使用智谱 glm-4-flash 模型
 - 数据全部 localStorage 持久化
 

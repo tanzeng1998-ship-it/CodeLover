@@ -363,7 +363,7 @@
   <button class="clear-btn" id="clearBtn">🗑️ 清空所有记录</button>
 
   <script>
-    const MOOD_KEY = 'monkey_mood_diary';
+    const MOOD_KEY = 'cyber_mood_diary';
     let currentFilter = 'all';
 
     const API_KEY = 'bb0937676c774d738cc49fa1914c4a29.DAMxFqJivtP6JpWI';
@@ -426,11 +426,11 @@
       const recentMoods = moodData.slice(0, 7);
 
       // 获取最近的会话记录
-      const chatData = JSON.parse(localStorage.getItem('monkey_chat_sessions') || '{"sessions":[]}');
+      const chatData = JSON.parse(localStorage.getItem('cyber_chat_sessions') || '{"sessions":[]}');
       const recentSessions = chatData.sessions.slice(0, 3);
 
       // 获取用户信息
-      const profile = JSON.parse(localStorage.getItem('monkey_user_profile') || '{}');
+      const profile = JSON.parse(localStorage.getItem('cyber_user_profile') || '{}');
 
       let context = '请根据以下信息生成夸夸：\n\n';
 
@@ -563,7 +563,7 @@
     renderList();
 
     // 同步主题
-    if (localStorage.getItem('monkey_theme') === 'dark') {
+    if (localStorage.getItem('cyber_theme') === 'dark') {
       document.body.classList.add('theme-dark');
     }
 
