@@ -25,13 +25,13 @@
       -webkit-app-region: drag;
     }
 
-    /* 拖拽热区覆盖层 */
+    /* 拖拽热区覆盖层（只覆盖宠物图片区域，不阻挡右侧按钮） */
     .drag-overlay {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 35px;
+      left: 5px;
+      width: 200px;
+      height: 280px;
       z-index: 5;
       pointer-events: auto;
     }
@@ -274,27 +274,45 @@
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
+
+    /* 音乐按钮通用播放中动画（同时作用于主窗口和聊天页） */
+    .bgm-playing {
+      animation: bgmPulse 1s ease-in-out infinite !important;
+    }
+    @keyframes bgmPulse {
+      0%, 100% { box-shadow: 0 4px 12px rgba(150,100,180,0.4), 0 0 0 0 rgba(150,100,180,0); }
+      50% { box-shadow: 0 4px 20px rgba(155,111,176,0.8), 0 0 12px 3px rgba(155,111,176,0.25); }
+    }
   </style>
 </head>
 <body>
   <div class="pet-container" id="petContainer">
-    <!-- 拖拽热区覆盖层 -->
-    <div class="drag-overlay" id="dragOverlay"></div>
-    
     <div class="speech-bubble" id="speechBubble">Hello World!</div>
     <div class="stars" id="stars"></div>
 
     <!-- 桌面窗口按钮 - 右上角对话 -->
     <button class="window-chat-btn" id="chatBtn" title="AI对话">💬</button>
+    
+    <!-- 音乐播放按钮 - 复用 window-chat-btn 的点击能力，与对话框按钮等大 -->
+    <button class="window-chat-btn" id="musicBtn" title="音乐开关"
+            style="right:5px;
+                   background: linear-gradient(135deg, #C8A2D4 0%, #9B6FB0 100%);
+                   box-shadow: 0 4px 15px rgba(150,100,180,0.6);">🎵</button>
 
     <img class="pet-image" id="petImage" src="pet-image.png" alt="桌面宠物">
     <div class="emoji-overlay" id="emojiOverlay"></div>
 
     <div class="status" id="status">💻 写代码中...</div>
+
+    <!-- 拖拽热区覆盖层（只覆盖宠物图片区域，不阻挡按钮） -->
+    <div class="drag-overlay" id="dragOverlay"></div>
   </div>
 
   <!-- 心情弹出提示（放在宠物容器外） -->
   <div class="mood-toast" id="moodToast"></div>
+
+  <!-- 背景音乐 -->
+  <audio id="bgmAudio" src="bgm0417.mp3" loop preload="auto" autoplay></audio>
 
   <script>
     const ipcRenderer = require('electron').ipcRenderer;
@@ -363,17 +381,115 @@
       ipcRenderer.send('open-chat');
     });
 
-    // ===== 打开日记窗口 =====
-    document.getElementById('diaryBtn').addEventListener('click', e => {
-      e.stopPropagation();
-      ipcRenderer.send('open-diary');
+    // ===== 打开日记窗口（按钮可能不存在，安全检查） =====
+    const diaryBtnEl = document.getElementById('diaryBtn');
+    if (diaryBtnEl) {
+      diaryBtnEl.addEventListener('click', e => {
+        e.stopPropagation();
+        ipcRenderer.send('open-diary');
+      });
+    }
+
+    // ===== 打开设置窗口（按钮可能不存在，安全检查） =====
+    const settingsBtnEl = document.getElementById('settingsBtn');
+    if (settingsBtnEl) {
+      settingsBtnEl.addEventListener('click', e => {
+        e.stopPropagation();
+        ipcRenderer.send('open-settings');
+      });
+    }
+
+    // ===== 音乐播放控制 =====
+    const bgmAudio = document.getElementById('bgmAudio');
+    const musicBtn = document.getElementById('musicBtn');
+
+    // 同步音乐按钮 UI 状态 + 广播给其他窗口
+    function updateMusicUI(playing) {
+      console.log('[BGM] 更新UI, playing=', playing);
+      if (playing) {
+        musicBtn.textContent = '🔊';
+        musicBtn.classList.add('bgm-playing');
+      } else {
+        musicBtn.textContent = '🎵';
+        musicBtn.classList.remove('bgm-playing');
+      }
+      // 广播状态变化到聊天窗口
+      ipcRenderer.send('bgm-state-changed', playing);
+    }
+
+    // 监听音频事件同步状态
+    bgmAudio.addEventListener('play', () => {
+      console.log('[BGM] audio play 事件触发');
+      updateMusicUI(true);
+    });
+    bgmAudio.addEventListener('pause', () => {
+      console.log('[BGM] audio pause 事件触发');
+      updateMusicUI(false);
+    });
+    bgmAudio.addEventListener('error', (e) => {
+      console.error('[BGM] 音频错误:', e);
     });
 
-    // ===== 打开设置窗口 =====
-    document.getElementById('settingsBtn').addEventListener('click', e => {
-      e.stopPropagation();
-      ipcRenderer.send('open-settings');
+    // ===== IPC 跨窗口 BGM 同步 =====
+    // 监听聊天页发来的切换指令
+    ipcRenderer.on('bgm-toggle', () => {
+      console.log('[BGM] 收到聊天页切换指令, 当前paused=', bgmAudio.paused);
+      if (!bgmAudio.paused) {
+        bgmAudio.pause();
+      } else {
+        bgmAudio.play().catch(err => console.error('[BGM] 播放失败:', err));
+      }
     });
+
+    // 监听聊天页的状态请求
+    ipcRenderer.on('bgm-request-state', () => {
+      ipcRenderer.send('bgm-state-sync', !bgmAudio.paused);
+    });
+
+    // 尝试自动播放背景音乐（作为 autoplay 失败时的后备方案）
+    function tryPlayMusic() {
+      console.log('[BGM] 尝试自动播放, 当前paused:', bgmAudio.paused, 'readyState:', bgmAudio.readyState);
+      // 如果 autoplay 已经在播放了，直接同步 UI
+      if (!bgmAudio.paused) {
+        console.log('[BGM] autoplay 已在播放，同步UI');
+        updateMusicUI(true);
+        return;
+      }
+      const promise = bgmAudio.play();
+      if (promise !== undefined) {
+        promise.then(() => {
+          console.log('[BGM] 自动播放成功');
+          showMoodToast('🎵 音乐已开始~', 1500);
+        }).catch(err => {
+          console.warn('[BGM] 自动播放被阻止:', err.message || err);
+          updateMusicUI(false);
+        });
+      }
+    }
+
+    // 音乐按钮 - 与聊天按钮使用完全相同的绑定方式
+    musicBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      console.log('[BGM] 按钮被点击! paused=', bgmAudio.paused);
+
+      if (!bgmAudio.paused) {
+        bgmAudio.pause();
+        showMoodToast('⏸️ 音乐已暂停', 1500);
+      } else {
+        const playPromise = bgmAudio.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            showMoodToast('🎵 音乐播放中~', 1500);
+          }).catch(err => {
+            console.error('[BGM] 播放失败:', err);
+            showMoodToast('❌ 播放失败', 2000);
+          });
+        }
+      }
+    });
+
+    // 页面加载后延迟尝试自动播放
+    setTimeout(tryPlayMusic, 800);
 
     // ===== 拖拽逻辑 =====
     let isDragging = false;
@@ -519,11 +635,41 @@
     }
 
     setTimeout(() => showSpeech('console.log("Hello!")'), 800);
+    
+    // 音频诊断：页面加载后1.5秒检查状态
+    setTimeout(() => {
+      const audio = document.getElementById('bgmAudio');
+      if (!audio) {
+        console.error('[BGM] 严重错误：找不到 audio 元素！');
+        alert('找不到 audio 元素');
+        return;
+      }
+      console.log('[BGM] 诊断: paused=', audio.paused, 'ended=', audio.ended, 
+                  'readyState=', audio.readyState, 
+                  'src=', audio.src, 
+                  'error=', audio.error,
+                  'duration=', audio.duration,
+                  'currentTime=', audio.currentTime,
+                  'volume=', audio.volume);
+      showMoodToast(`🔍 BGM: ${audio.paused?'暂停':'播放中'} r${audio.readyState} d${Math.floor(audio.duration||0)}s`, 5000);
+    }, 1500);
+    
     setTimeout(updateStatus, 3000);
     startIdleBehavior();
 
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') window.close();
+      // 按 M 键切换音乐（调试用，验证音频控制逻辑）
+      if (e.key === 'm' || e.key === 'M') {
+        console.log('[BGM] 键盘M触发, paused=', bgmAudio.paused);
+        if (!bgmAudio.paused) {
+          bgmAudio.pause();
+          showMoodToast('⏸️ 音乐已暂停', 1500);
+        } else {
+          bgmAudio.play().then(() => showMoodToast('🎵 音乐播放中~', 1500))
+                       .catch(err => console.error('[BGM] 失败:', err));
+        }
+      }
     });
   </script>
 </body>

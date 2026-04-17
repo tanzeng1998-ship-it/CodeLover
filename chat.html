@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>恋人代码</title>
+  <title>赛博恋人</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     ::-webkit-scrollbar { display: none; }
@@ -394,6 +394,19 @@
     .action-btn:hover {
       background: rgba(255,160,185,0.5);
       transform: scale(1.08);
+    }
+    #bgmIcon {
+      font-size: 14px;
+    }
+    /* BGM播放中：紫色背景 + 脉冲动画 */
+    #bgmToggleBtn.bgm-playing {
+      background: linear-gradient(135deg, #C8A2D4 0%, #9B6FB0 100%) !important;
+      border-color: rgba(155,111,176,0.9) !important;
+      animation: chatBgmPulse 1.2s ease-in-out infinite;
+    }
+    @keyframes chatBgmPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(155,111,176,0); transform: scale(1); }
+      50% { box-shadow: 0 0 10px 3px rgba(155,111,176,0.35); transform: scale(1.06); }
     }
     .action-btn .btn-icon {
       width: 16px;
@@ -1587,6 +1600,10 @@
         <button class="action-btn" onclick="openMusicPlayer()" title="音乐">
           <span class="btn-icon" style="-webkit-mask-image:url('svg/ic_music.svg');mask-image:url('svg/ic_music.svg')"></span>
         </button>
+        <!-- BGM 背景音乐开关 -->
+        <button class="action-btn" id="bgmToggleBtn" onclick="toggleBGM()" title="背景音乐开关">
+          <span id="bgmIcon">🎵</span>
+        </button>
         <button class="action-btn" onclick="openDiary()" title="日记">
           <span class="btn-icon" style="-webkit-mask-image:url('svg/book.svg');mask-image:url('svg/book.svg')"></span>
         </button>
@@ -1744,6 +1761,33 @@
   </div>
 
   <script>
+    // ===== BGM 背景音乐控制（通过IPC与主窗口同步） =====
+    const ipcRendererChat = require('electron').ipcRenderer;
+    let bgmPlaying = false;
+    const bgmIcon = document.getElementById('bgmIcon');
+
+    // 监听主窗口广播的BGM状态变化
+    ipcRendererChat.on('bgm-state-sync', (e, playing) => {
+      bgmPlaying = playing;
+      bgmIcon.textContent = playing ? '🔊' : '🎵';
+      const btn = document.getElementById('bgmToggleBtn');
+      if (playing) {
+        btn.classList.add('bgm-playing');
+      } else {
+        btn.classList.remove('bgm-playing');
+      }
+    });
+
+    // 切换BGM - 发送IPC指令给主窗口
+    function toggleBGM() {
+      ipcRendererChat.send('bgm-toggle');
+    }
+
+    // 页面打开时请求当前状态
+    setTimeout(() => {
+      ipcRendererChat.send('bgm-request-state');
+    }, 500);
+
     // ===== 会话列表折叠/展开 =====
     function toggleSessionPanel() {
       const panel = document.getElementById('sessionPanel');

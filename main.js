@@ -203,6 +203,28 @@ ipcMain.on('game-complete', (event, gameData) => {
   }
 });
 
+// ===== BGM 背景音乐同步控制（主窗口持有音频，聊天页通过IPC控制） =====
+ipcMain.on('bgm-toggle', (event) => {
+  // 将切换命令转发给主窗口
+  if (win && !win.isDestroyed()) {
+    win.webContents.send('bgm-toggle');
+  }
+});
+
+// 主窗口广播BGM状态变化给所有窗口
+ipcMain.on('bgm-state-changed', (event, playing) => {
+  if (chatWin && !chatWin.isDestroyed()) {
+    chatWin.webContents.send('bgm-state-sync', playing);
+  }
+});
+
+// 聊天页请求当前BGM状态
+ipcMain.on('bgm-request-state', (event) => {
+  if (win && !win.isDestroyed()) {
+    win.webContents.send('bgm-request-state');
+  }
+});
+
 // 关闭子窗口
 ipcMain.on('close-diary', () => {
   if (diaryWin && !diaryWin.isDestroyed()) diaryWin.close();
