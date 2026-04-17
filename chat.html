@@ -2953,6 +2953,9 @@ ${extraContext}
 
     function playMusic(songId, songName, artistName) {
       if (currentMusic && currentMusic.id === songId) { togglePlay(); return; }
+      // 一起听歌时自动关闭背景BGM
+      const ipcRenderer = require('electron').ipcRenderer;
+      ipcRenderer.send('bgm-stop-for-music');
       const musicUrl = `https://music.163.com/song/media/outer/url?id=${songId}.mp3`;
       currentMusic = { id: songId, name: songName, artist: artistName, url: musicUrl };
       audioPlayer.src = musicUrl;

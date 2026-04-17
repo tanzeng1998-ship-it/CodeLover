@@ -225,6 +225,13 @@ ipcMain.on('bgm-request-state', (event) => {
   }
 });
 
+// 聊天页请求关闭BGM（一起听歌时调用）
+ipcMain.on('bgm-stop-for-music', (event) => {
+  if (win && !win.isDestroyed()) {
+    win.webContents.send('bgm-force-stop');
+  }
+});
+
 // 关闭子窗口
 ipcMain.on('close-diary', () => {
   if (diaryWin && !diaryWin.isDestroyed()) diaryWin.close();

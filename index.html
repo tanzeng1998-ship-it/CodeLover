@@ -441,9 +441,18 @@
       }
     });
 
-    // 监听聊天页的状态请求
+// 监听聊天页的状态请求
     ipcRenderer.on('bgm-request-state', () => {
       ipcRenderer.send('bgm-state-sync', !bgmAudio.paused);
+    });
+
+    // 监听聊天页的强制关闭BGM指令（一起听歌时调用）
+    ipcRenderer.on('bgm-force-stop', () => {
+      console.log('[BGM] 收到一起听歌指令，强制关闭BGM');
+      if (!bgmAudio.paused) {
+        bgmAudio.pause();
+        updateMusicUI(false);
+      }
     });
 
     // 尝试自动播放背景音乐（作为 autoplay 失败时的后备方案）
