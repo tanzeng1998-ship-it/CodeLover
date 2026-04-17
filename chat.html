@@ -571,6 +571,59 @@
       border-color: #FF80A0;
       background: linear-gradient(135deg, #FF9AAF 0%, #FF7A9A 100%);
     }
+    /* ===== 礼物特效 ===== */
+    .gift-effect-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 9999;
+      overflow: hidden;
+    }
+    .gift-particle {
+      position: absolute;
+      font-size: 24px;
+      animation: giftFloat 2s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes giftFloat {
+      0% { transform: translateY(0) scale(0) rotate(0deg); opacity: 1; }
+      20% { transform: translateY(-20vh) scale(1.2) rotate(20deg); opacity: 1; }
+      100% { transform: translateY(-100vh) scale(0.5) rotate(-20deg); opacity: 0; }
+    }
+    .gift-burst {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      font-size: 80px;
+      animation: giftBurst 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      z-index: 10000;
+      pointer-events: none;
+    }
+    @keyframes giftBurst {
+      0% { transform: translate(-50%, -50%) scale(0) rotate(-15deg); opacity: 1; }
+      50% { transform: translate(-50%, -50%) scale(1.3) rotate(10deg); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(0.8) rotate(0deg); opacity: 0; }
+    }
+    .affection-burst {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 28px;
+      font-weight: bold;
+      color: #FF6B9D;
+      text-shadow: 0 0 10px rgba(255,107,157,0.5);
+      animation: affectionPop 1.5s ease-out forwards;
+      z-index: 10001;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    @keyframes affectionPop {
+      0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+      30% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
+      100% { transform: translate(-50%, -100%) scale(1); opacity: 0; }
+    }
     /* ===== 音乐播放器弹窗 ===== */
     .music-modal {
       position: fixed;
@@ -728,6 +781,65 @@
     }
     .music-empty { text-align: center; color: rgba(192,96,120,0.55); padding: 30px 20px; font-size: 13px; }
     .music-loading { text-align: center; color: rgba(192,96,120,0.65); padding: 20px; font-size: 13px; }
+    /* ===== 音乐浪漫特效 ===== */
+    .music-romantic-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 9998;
+      overflow: hidden;
+      background: radial-gradient(ellipse at center, rgba(255,183,197,0.1) 0%, transparent 60%);
+      animation: bgGlow 4s ease-in-out infinite;
+    }
+    @keyframes bgGlow {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    .music-hearts {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 9997;
+      background: radial-gradient(ellipse at center, rgba(255,154,175,0.12) 0%, transparent 60%);
+      animation: heartsGlow 3s ease-in-out infinite;
+    }
+    @keyframes heartsGlow {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.9; }
+    }
+    .music-note {
+      position: absolute;
+      font-size: 16px;
+      animation: noteFloat 8s ease-out forwards;
+      pointer-events: none;
+      opacity: 0;
+      text-shadow: 0 0 8px rgba(255,183,197,0.6);
+    }
+    .music-note.note-active { opacity: 0.85; }
+    @keyframes noteFloat {
+      0% { transform: translateY(100vh) rotate(0deg) scale(0.5); opacity: 0; }
+      8% { opacity: 0.85; }
+      90% { opacity: 0.5; }
+      100% { transform: translateY(-20vh) rotate(360deg) scale(1); opacity: 0; }
+    }
+    .music-star {
+      position: absolute;
+      font-size: 14px;
+      animation: starSparkle 4s ease-in-out infinite;
+      pointer-events: none;
+      text-shadow: 0 0 10px rgba(255,215,0,0.8);
+    }
+    @keyframes starSparkle {
+      0%, 100% { opacity: 0.3; transform: scale(0.8) rotate(0deg); }
+      50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+    }
+    .cover.playing {
+      animation: coverPulse 2s ease-in-out infinite;
+    }
+    @keyframes coverPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,183,197,0); }
+      50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(255,183,197,0.5); }
+    }
     /* ===== 礼物选择弹窗 ===== */
     .gift-modal {
       position: fixed;
@@ -2637,6 +2749,10 @@ ${extraContext}
       if (inventory[giftId].count <= 0) delete inventory[giftId];
       saveInventory(inventory);
       closeGiftModal();
+
+      // 播放礼物特效
+      playGiftEffect(gift);
+
       if (!currentSessionId) createSession();
       const session = getCurrentSession();
       const giftData = { id: gift.id, emoji: gift.emoji, name: gift.name, desc: gift.desc, price: gift.price, affection: gift.affection || 5 };
@@ -2677,6 +2793,43 @@ ${extraContext}
         loadingMsg.remove();
         console.error('Gift API Error:', error);
       }
+    }
+
+    // 礼物特效
+    function playGiftEffect(gift) {
+      // 礼物爆发图标
+      const burst = document.createElement('div');
+      burst.className = 'gift-burst';
+      burst.textContent = gift.emoji;
+      document.body.appendChild(burst);
+      setTimeout(() => burst.remove(), 1500);
+
+      // 好感度弹出
+      const affectionPop = document.createElement('div');
+      affectionPop.className = 'affection-burst';
+      affectionPop.textContent = `+${gift.affection || 5} 💕`;
+      document.body.appendChild(affectionPop);
+      setTimeout(() => affectionPop.remove(), 1500);
+
+      // 粒子飘落
+      const particles = ['💖', '✨', '💗', '🌸', '💕', '⭐', '🎀'];
+      const overlay = document.createElement('div');
+      overlay.className = 'gift-effect-overlay';
+      document.body.appendChild(overlay);
+
+      for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+          const particle = document.createElement('div');
+          particle.className = 'gift-particle';
+          particle.textContent = particles[Math.floor(Math.random() * particles.length)];
+          particle.style.left = Math.random() * 100 + 'vw';
+          particle.style.bottom = '-50px';
+          particle.style.animationDelay = Math.random() * 0.5 + 's';
+          overlay.appendChild(particle);
+          setTimeout(() => particle.remove(), 2500);
+        }, i * 80);
+      }
+      setTimeout(() => overlay.remove(), 3000);
     }
 
     function showToast(message, type = '') {
@@ -2765,9 +2918,13 @@ ${extraContext}
       document.getElementById('currentMusicArtist').textContent = artistName;
       document.getElementById('musicPlayerBar').style.display = 'flex';
       document.getElementById('playBtn').textContent = '⏸';
+      // 封面播放动画
+      document.querySelector('.music-player-bar .cover')?.classList.add('playing');
       updateMusicListUI();
       sendMusicCardMessage(songId, songName, artistName);
       addCoins(8, '一起听歌');
+      // 启动浪漫特效
+      startMusicRomance();
     }
 
     function togglePlay() {
@@ -2775,9 +2932,13 @@ ${extraContext}
       if (isPlaying) {
         audioPlayer.pause(); isPlaying = false;
         document.getElementById('playBtn').textContent = '▶';
+        document.querySelector('.music-player-bar .cover')?.classList.remove('playing');
+        pauseMusicRomance();
       } else {
         audioPlayer.play(); isPlaying = true;
         document.getElementById('playBtn').textContent = '⏸';
+        document.querySelector('.music-player-bar .cover')?.classList.add('playing');
+        startMusicRomance();
       }
       updateMusicListUI();
       updateMusicCardStatus(currentMusic.id, isPlaying);
@@ -2788,8 +2949,76 @@ ${extraContext}
       audioPlayer.pause(); audioPlayer.currentTime = 0;
       isPlaying = false; currentMusic = null;
       document.getElementById('musicPlayerBar').style.display = 'none';
+      document.querySelector('.music-player-bar .cover')?.classList.remove('playing');
       updateMusicListUI();
       if (stoppedMusicId) updateMusicCardStatus(stoppedMusicId, false);
+      stopMusicRomance();
+    }
+
+    // 音乐浪漫特效
+    let musicEffectInterval = null;
+    let musicHeartsEl = null;
+    let starEffectInterval = null;
+
+    function startMusicRomance() {
+      if (musicEffectInterval) return;
+      // 添加背景光晕
+      if (!musicHeartsEl) {
+        musicHeartsEl = document.createElement('div');
+        musicHeartsEl.className = 'music-hearts';
+        document.body.appendChild(musicHeartsEl);
+      }
+      musicHeartsEl.style.display = 'block';
+      // 创建飘落效果层
+      const overlay = document.createElement('div');
+      overlay.className = 'music-romantic-overlay';
+      overlay.id = 'musicRomanticOverlay';
+      document.body.appendChild(overlay);
+      // 爱心飘落
+      const hearts = ['💕', '💗', '💖', '💓', '💝', '❤️', '🩷'];
+      musicEffectInterval = setInterval(() => {
+        if (!isPlaying) return;
+        const note = document.createElement('div');
+        note.className = 'music-note note-active';
+        note.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+        note.style.left = Math.random() * 100 + '%';
+        note.style.fontSize = (18 + Math.random() * 10) + 'px';
+        note.style.animationDuration = '8s';
+        overlay.appendChild(note);
+        setTimeout(() => note.remove(), 9000);
+      }, 600);
+      // 星星闪烁
+      starEffectInterval = setInterval(() => {
+        if (!isPlaying) return;
+        const star = document.createElement('div');
+        star.className = 'music-star';
+        star.textContent = '⭐';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 50 + '%';
+        star.style.animationDelay = Math.random() * 2 + 's';
+        overlay.appendChild(star);
+        setTimeout(() => star.remove(), 5000);
+      }, 1000);
+    }
+
+    function pauseMusicRomance() {
+      if (musicEffectInterval) {
+        clearInterval(musicEffectInterval);
+        musicEffectInterval = null;
+      }
+      if (starEffectInterval) {
+        clearInterval(starEffectInterval);
+        starEffectInterval = null;
+      }
+      if (musicHeartsEl) {
+        musicHeartsEl.style.display = 'none';
+      }
+    }
+
+    function stopMusicRomance() {
+      pauseMusicRomance();
+      const overlay = document.getElementById('musicRomanticOverlay');
+      if (overlay) overlay.remove();
     }
 
     function updateMusicListUI() {
