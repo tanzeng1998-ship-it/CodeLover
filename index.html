@@ -660,7 +660,7 @@
                   'duration=', audio.duration,
                   'currentTime=', audio.currentTime,
                   'volume=', audio.volume);
-      showMoodToast(`🔍 BGM: ${audio.paused?'暂停':'播放中'} r${audio.readyState} d${Math.floor(audio.duration||0)}s`, 5000);
+      showMoodToast(audio.paused ? '🎵 音乐已暂停~' : '🎵 音乐播放中~', 1500);
     }, 1500);
     
     setTimeout(updateStatus, 3000);
