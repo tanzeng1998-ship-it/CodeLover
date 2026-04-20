@@ -232,6 +232,14 @@ ipcMain.on('bgm-stop-for-music', (event) => {
   }
 });
 
+// ===== 意图识别转发：主窗口发来的自然语言意图 =====
+ipcMain.on('intent-music', (event, songName) => {
+  // 主窗口检测到听歌意图，转发给聊天窗口自动播放
+  if (chatWin && !chatWin.isDestroyed()) {
+    chatWin.webContents.send('intent-music', songName);
+  }
+});
+
 // 关闭子窗口
 ipcMain.on('close-diary', () => {
   if (diaryWin && !diaryWin.isDestroyed()) diaryWin.close();

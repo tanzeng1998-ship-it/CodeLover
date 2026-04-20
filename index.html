@@ -275,6 +275,73 @@
       transform: translateX(-50%) translateY(0);
     }
 
+    /* ===== 自然语言输入弹窗 ===== */
+    .command-overlay {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 320px;
+      background: rgba(255,245,248,0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,160,185,0.4);
+      border-radius: 14px 14px 0 0;
+      padding: 12px 10px 14px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(100%);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 500;
+      box-shadow: 0 -4px 20px rgba(255,140,170,0.15);
+    }
+    .command-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .command-input-wrap {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .command-input-wrap input {
+      flex: 1;
+      border: 1px solid rgba(255,160,185,0.4);
+      border-radius: 20px;
+      padding: 8px 14px;
+      font-size: 13px;
+      outline: none;
+      background: rgba(255,255,255,0.9);
+      color: #5a3a4a;
+      -webkit-app-region: no-drag;
+    }
+    .command-input-wrap input::placeholder {
+      color: rgba(192,96,120,0.45);
+    }
+    .command-input-wrap input:focus {
+      border-color: #FF9AAF;
+      box-shadow: 0 0 0 2px rgba(255,160,185,0.15);
+    }
+    .command-send-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #FFB7C5 0%, #FF9AAF 100%);
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.15s;
+      -webkit-app-region: no-drag;
+    }
+    .command-send-btn:hover {
+      transform: scale(1.1);
+    }
+
     /* 音乐按钮通用播放中动画（同时作用于主窗口和聊天页） */
     .bgm-playing {
       animation: bgmPulse 1s ease-in-out infinite !important;
@@ -310,6 +377,14 @@
 
   <!-- 心情弹出提示（放在宠物容器外） -->
   <div class="mood-toast" id="moodToast"></div>
+
+  <!-- 自然语言输入弹窗 -->
+  <div class="command-overlay" id="commandOverlay">
+    <div class="command-input-wrap">
+      <input type="text" id="commandInput" placeholder="说点什么...（一起听歌、打游戏）" autocomplete="off">
+      <button class="command-send-btn" id="commandSendBtn">✈</button>
+    </div>
+  </div>
 
   <!-- 背景音乐 -->
   <audio id="bgmAudio" src="bgm0417.mp3" loop preload="auto" autoplay></audio>
@@ -547,6 +622,7 @@
       { emoji: '🌟', text: '哇，你来了！' },
       { emoji: '🥰', text: '摸摸我~' },
       { emoji: '😲', text: '吓我一跳！' },
+      { emoji: '💬', text: '双击我说话~' },
     ];
 
     let hoverTimer = null;
@@ -668,7 +744,15 @@
     startIdleBehavior();
 
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') window.close();
+      if (e.key === 'Escape') {
+        // 如果命令面板打开，先关闭它；否则关闭窗口
+        const overlay = document.getElementById('commandOverlay');
+        if (overlay.classList.contains('show')) {
+          overlay.classList.remove('show');
+          return;
+        }
+        window.close();
+      }
       // 按 M 键切换音乐（调试用，验证音频控制逻辑）
       if (e.key === 'm' || e.key === 'M') {
         console.log('[BGM] 键盘M触发, paused=', bgmAudio.paused);
@@ -680,7 +764,144 @@
                        .catch(err => console.error('[BGM] 失败:', err));
         }
       }
+      // 按 Enter 键或 Space 键打开命令输入
+      if ((e.key === 'Enter' || e.key === ' ') && e.target === document.body) {
+        e.preventDefault();
+        const overlay = document.getElementById('commandOverlay');
+        if (!overlay.classList.contains('show')) {
+          overlay.classList.add('show');
+          document.getElementById('commandInput').focus();
+        }
+      }
     });
+
+    // ===== 自然语言命令输入 =====
+    const commandOverlay = document.getElementById('commandOverlay');
+    const commandInput = document.getElementById('commandInput');
+    const commandSendBtn = document.getElementById('commandSendBtn');
+
+    // 桌面宠物双击打开命令输入
+    petContainer.addEventListener('dblclick', e => {
+      e.stopPropagation();
+      const overlay = document.getElementById('commandOverlay');
+      if (overlay.classList.contains('show')) {
+        overlay.classList.remove('show');
+      } else {
+        overlay.classList.add('show');
+        document.getElementById('commandInput').focus();
+      }
+    });
+
+    function detectIntent(text) {
+      // 音乐意图
+      const specificSongPatterns = [
+        /(?:听|播放|放|想听|来首|我要听|给我放|播)[《『「"']([^《』」"']+)[》』」"']/,
+        /(?:听|播放|放|想听|来首|我要听|给我放|播)\s*["']([^"']+)["']/,
+        /(?:听|播放|放|想听|来首|我要听|给我放|播)\s+(.+?)(?:\s*$|\s+吧|\s+好吗|\s+吗)/,
+      ];
+      let songName = null;
+      for (const pattern of specificSongPatterns) {
+        const match = text.match(pattern);
+        if (match && match[1] && match[1].length > 1 && match[1].length < 30) {
+          songName = match[1].trim();
+          break;
+        }
+      }
+      const musicKeywords = [
+        '一起听歌', '一起听音乐', '放首歌', '听首歌', '听首歌吧', '放首歌吧',
+        '想听歌', '来首歌', '听歌吗', '听音乐', '听歌', '放音乐', '播放音乐',
+        '听点音乐', '来点音乐', '陪我听歌', '一起听', 'music',
+      ];
+      const musicPatterns = [
+        /想听.{0,4}歌/, /来.{0,2}首.{0,4}歌/, /放.{0,2}首.{0,4}歌/,
+        /听.{0,3}音乐/, /播放.{0,4}歌/, /听.{0,2}歌.{0,2}吧/,
+      ];
+      if (songName) return { intent: 'music', songName };
+      if (musicKeywords.some(kw => text.includes(kw)) || musicPatterns.some(p => p.test(text))) {
+        return { intent: 'music', songName: null };
+      }
+
+      // 游戏意图
+      const gameKeywords = [
+        '打游戏', '玩游戏', '来一局', '一起玩', '玩一局', '玩游戏吧',
+        '来玩游戏', '开一局', '小动物快跑', '跑酷', '闯关',
+        '打游戏吧', '陪我玩', '陪我打游戏', '来局游戏', '玩小游戏',
+        '玩个游戏', '想玩游戏', '打游戏吗', '来玩吗',
+      ];
+      const gameNegPatterns = [/不想.{0,4}玩/, /不要.{0,4}玩/, /不玩/, /没.{0,2}游戏/, /游戏不好/];
+      const gamePatterns = [
+        /(?:想|要|来|去|快|赶紧|陪我).{0,3}(?:玩|打).{0,3}游戏/,
+        /玩.{0,3}游戏/, /打.{0,3}游戏/, /来.{0,3}局/, /一起.{0,3}玩/, /陪.{0,2}玩/,
+      ];
+      if (!gameNegPatterns.some(p => p.test(text)) && (gameKeywords.some(kw => text.includes(kw)) || gamePatterns.some(p => p.test(text)))) {
+        return { intent: 'game' };
+      }
+
+      // 聊天意图
+      const chatKeywords = [
+        '聊天', '说话', '聊聊', '说话吧', '聊聊天', '陪我聊',
+        '和你说', '跟你说', '告诉你', '想聊天', '聊天吗',
+      ];
+      if (chatKeywords.some(kw => text.includes(kw))) {
+        return { intent: 'chat' };
+      }
+
+      return { intent: 'unknown' };
+    }
+
+    function executeCommand() {
+      const text = commandInput.value.trim();
+      if (!text) {
+        commandOverlay.classList.remove('show');
+        return;
+      }
+
+      const intentResult = detectIntent(text);
+
+      if (intentResult.intent === 'music') {
+        ipcRenderer.send('open-chat');
+        showSpeech('🎵 好，马上放歌~');
+        showMoodToast('🎵 马上为你播放~', 2000);
+        // 延迟发送让聊天窗口先打开，再触发播放
+        const songQuery = intentResult.songName || '__random__';
+        setTimeout(() => {
+          ipcRenderer.send('intent-music', songQuery);
+        }, 800);
+      } else if (intentResult.intent === 'game') {
+        ipcRenderer.send('open-game');
+        showSpeech('🎮 加油哦~');
+        showMoodToast('🎮 小动物快跑！', 2000);
+      } else if (intentResult.intent === 'chat') {
+        ipcRenderer.send('open-chat');
+        showSpeech('💬 来聊天吧~');
+      } else {
+        // 无法识别，打开聊天窗口让AI继续对话
+        ipcRenderer.send('open-chat');
+        showSpeech('💬 来聊聊天吧~');
+      }
+
+      commandInput.value = '';
+      commandOverlay.classList.remove('show');
+      showStars();
+    }
+
+    commandSendBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      executeCommand();
+    });
+    commandInput.addEventListener('keydown', e => {
+      e.stopPropagation();
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        executeCommand();
+      }
+      if (e.key === 'Escape') {
+        commandOverlay.classList.remove('show');
+      }
+    });
+    // 阻止输入框的空格和按键冒泡到全局
+    commandInput.addEventListener('keyup', e => e.stopPropagation());
+    commandInput.addEventListener('keypress', e => e.stopPropagation());
   </script>
 </body>
 </html>

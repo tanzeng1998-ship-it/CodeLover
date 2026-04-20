@@ -1753,7 +1753,7 @@
           <button class="gift-btn" onclick="openGiftModal()" title="赠送礼物">
             <span style="display:block;width:20px;height:20px;background-color:white;-webkit-mask-image:url('svg/gift.svg');mask-image:url('svg/gift.svg');-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center"></span>
           </button>
-          <input type="text" id="messageInput" placeholder="输入消息..." onkeypress="handleKeyPress(event)">
+          <input type="text" id="messageInput" placeholder="说点什么...（试试"一起听歌"、"打游戏"）" onkeypress="handleKeyPress(event)">
           <button class="send-btn" onclick="sendMessage()">发送</button>
         </div>
       </div>
@@ -2329,11 +2329,19 @@
 ${userInfo}
 ${extraContext}
 
-【重要提醒】你始终是${aiName}，以上人设、性格、语气是你的核心身份，不可因为对话内容而偏离或忘记。无论聊到什么话题，都要保持在角色中。`;
+【重要提醒】你始终是${aiName}，以上人设、性格、语气是你的核心身份，不可因为对话内容而偏离或忘记。无论聊到什么话题，都要保持在角色中。
+
+【自然语言交互】用户可以通过自然语言触发以下操作（系统已自动识别并执行，你不需要重复动作，只需自然回应即可）：
+- 音乐：当用户说"一起听歌"、"听《晴天》"等，系统会自动搜索并播放歌曲（指定歌名则播放指定歌曲，否则随机推荐一首），你只需用温柔的方式回应，比如"好，已经帮你放好了~"。
+- 游戏：当用户说"打游戏"、"来一局"等，系统会自动打开游戏，你只需回应，比如"好呀，我看着你玩~"。`;
       } else {
         prompt = `${basePrompt}
 
-【重要提醒】你始终是${aiName}，以上人设、性格、语气是你的核心身份，不可因为对话内容而偏离或忘记。无论聊到什么话题，都要保持在角色中。`;
+【重要提醒】你始终是${aiName}，以上人设、性格、语气是你的核心身份，不可因为对话内容而偏离或忘记。无论聊到什么话题，都要保持在角色中。
+
+【自然语言交互】用户可以通过自然语言触发以下操作（系统已自动识别并执行，你不需要重复动作，只需自然回应即可）：
+- 音乐：当用户说"一起听歌"、"听《晴天》"等，系统会自动搜索并播放歌曲（指定歌名则播放指定歌曲，否则随机推荐一首），你只需用温柔的方式回应，比如"好，已经帮你放好了~"。
+- 游戏：当用户说"打游戏"、"来一局"等，系统会自动打开游戏，你只需回应，比如"好呀，我看着你玩~"。`;
       }
       _systemPromptCache = prompt;
       return prompt;
@@ -2521,12 +2529,9 @@ ${extraContext}
       }
     }
 
-    // ===== 发送消息 =====
-    async function sendMessage() {
-      const text = messageInput.value.trim();
-      if (!text) return;
-
-      // —— 检测用户是否想要一起听歌 ——
+    // ===== 意图识别系统 =====
+    function detectIntent(text) {
+      // —— 1. 音乐意图检测 ——
       // 先检测是否包含具体歌名（匹配《歌名》或"听XXX"格式）
       const specificSongPatterns = [
         /(?:听|播放|放|想听|来首|我要听|给我放|播)[《『「"']([^《』」"']+)[》』」"']/,
@@ -2541,23 +2546,117 @@ ${extraContext}
           break;
         }
       }
+
+      const musicKeywords = [
+        '一起听歌', '一起听音乐', '放首歌', '听首歌', '听首歌吧', '放首歌吧',
+        '想听歌', '来首歌', '听歌吗', '听音乐', '听歌', '放音乐', '播放音乐',
+        '听点音乐', '来点音乐', '音乐播放', '播放歌', '来点歌', '听个歌',
+        '陪我听歌', '一起听', '共享音乐', 'music', '听曲', '来首曲子',
+      ];
+      const musicPatterns = [
+        /想听.{0,4}歌/, /来.{0,2}首.{0,4}歌/, /放.{0,2}首.{0,4}歌/,
+        /听.{0,3}音乐/, /播放.{0,4}歌/, /听.{0,2}歌.{0,2}吧/,
+      ];
       
       if (songName) {
-        // 用户指定了歌名，直接搜索播放
-        setTimeout(() => {
-          openMusicPlayer();
-          autoPlaySong(songName);
-        }, 300);
-      } else {
-        // 检测是否只想打开播放器
-        const musicKeywords = ['一起听歌', '一起听音乐', '放首歌', '听首歌', '听首歌吧', '放首歌吧', '想听歌', '来首歌', '听歌吗', '听音乐'];
-        const wantsMusic = musicKeywords.some(kw => text.includes(kw));
-        if (wantsMusic) {
+        return { intent: 'music', songName };
+      }
+      if (musicKeywords.some(kw => text.includes(kw)) || musicPatterns.some(p => p.test(text))) {
+        return { intent: 'music', songName: null };
+      }
+
+      // —— 2. 游戏意图检测 ——
+      const gameKeywords = [
+        '打游戏', '玩游戏', '来一局', '一起玩', '玩一局', '玩游戏吧',
+        '来玩游戏', '开一局', '小动物快跑', '跑酷', '闯关',
+        '打游戏吧', '陪我玩', '陪我打游戏', '来局游戏', '玩小游戏',
+        '玩个游戏', '想玩游戏', '打游戏吗', '来玩吗',
+        '开玩', '来玩局', '玩把游戏',
+      ];
+      // 排除否定语境（如"这个游戏不好玩"、"不想玩游戏"）
+      const gameNegPatterns = [
+        /不想.{0,4}玩/, /不要.{0,4}玩/, /不玩/, /没.{0,2}游戏/, /游戏不好/,
+        /不会.{0,4}玩/, /别.{0,2}玩/,
+      ];
+      const gamePatterns = [
+        /(?:想|要|来|去|快|赶紧|陪我).{0,3}(?:玩|打).{0,3}游戏/,
+        /玩.{0,3}游戏/, /打.{0,3}游戏/, /来.{0,3}局/,
+        /一起.{0,3}玩/, /陪.{0,2}玩/, /开.{0,3}局/,
+      ];
+
+      const isGameNegated = gameNegPatterns.some(p => p.test(text));
+      if (!isGameNegated && (gameKeywords.some(kw => text.includes(kw)) || gamePatterns.some(p => p.test(text)))) {
+        return { intent: 'game' };
+      }
+
+      return { intent: 'unknown' };
+    }
+
+    // AI 辅助意图识别（短句兜底）
+    async function tryDetectIntentByAI(text) {
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${API_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'glm-4-flash',
+            messages: [
+              { role: 'system', content: '你是一个意图识别助手。用户会发来一句简短的中文，请判断用户的意图。只能回复以下两个选项之一：\n- music（用户想听歌/一起听歌）\n- game（用户想玩游戏/打游戏）\n- none（以上都不是）\n\n只回复一个英文单词，不要任何解释。' },
+              { role: 'user', content: text }
+            ],
+            stream: false,
+            temperature: 0.1,
+          })
+        });
+        const data = await response.json();
+        if (data.choices && data.choices[0]) {
+          const aiIntent = data.choices[0].message.content.trim().toLowerCase();
+          if (aiIntent === 'music') {
+            openMusicPlayer();
+            showToast('🎵 已为你打开音乐播放器~');
+          } else if (aiIntent === 'game') {
+            openGame();
+            showToast('🎮 小动物快跑！加油哦~');
+          }
+        }
+      } catch (e) {
+        // AI识别失败，静默忽略
+        console.log('[意图识别] AI辅助识别失败:', e);
+      }
+    }
+
+    // ===== 发送消息 =====
+    async function sendMessage() {
+      const text = messageInput.value.trim();
+      if (!text) return;
+
+      // ===== 意图识别系统 =====
+      const intentResult = detectIntent(text);
+      
+      if (intentResult.intent === 'music') {
+        if (intentResult.songName) {
           setTimeout(() => {
             openMusicPlayer();
-            showToast('🎵 已为你打开音乐播放器，搜索想听的歌曲吧~');
+            autoPlaySong(intentResult.songName);
+          }, 300);
+        } else {
+          // 没有指定歌名，随机推荐一首歌直接播放
+          setTimeout(() => {
+            openMusicPlayer();
+            autoPlayRandomSong();
           }, 300);
         }
+      } else if (intentResult.intent === 'game') {
+        setTimeout(() => {
+          openGame();
+          showToast('🎮 小动物快跑！加油哦~');
+        }, 300);
+      } else if (intentResult.intent === 'unknown' && text.length <= 20 && !text.includes('？') && !text.includes('?')) {
+        // 短句且不含问号，可能是意图表达，用AI辅助识别
+        tryDetectIntentByAI(text);
       }
 
       // —— 关键词检测：惩罚优先于加分 ——
@@ -2623,6 +2722,14 @@ ${extraContext}
       chatContainer.appendChild(loadingMsg);
       chatContainer.scrollTop = chatContainer.scrollHeight;
 
+      // 构建意图上下文后缀
+      let intentContext = '';
+      if (intentResult.intent === 'music') {
+        intentContext = '\n\n【系统提示】用户刚表达了听歌的意图，系统已自动搜索并播放歌曲（如用户指定了歌名则播放指定歌曲，否则随机推荐一首）。请自然地回应，比如"好，已经帮你放好了~"，语气温柔。';
+      } else if (intentResult.intent === 'game') {
+        intentContext = '\n\n【系统提示】用户刚表达了玩游戏的意图，系统已自动打开游戏窗口。请自然地回应，表示你看着他玩/陪他玩，语气轻松鼓励。';
+      }
+
       try {
         const response = await fetch(API_URL, {
           method: 'POST',
@@ -2633,7 +2740,7 @@ ${extraContext}
           body: JSON.stringify({
             model: 'glm-4-flash',
             messages: [
-              { role: 'system', content: buildSystemPrompt() },
+              { role: 'system', content: buildSystemPrompt() + intentContext },
               // 滑动窗口：只保留最近 20 轮对话（40 条），防止上下文过长导致人设丢失
               ...session.messages.slice(-40).map(m => ({ role: m.role, content: m.content }))
             ],
@@ -2700,6 +2807,19 @@ ${extraContext}
 
     // ===== 游戏完成夸夸 =====
     const { ipcRenderer } = require('electron');
+
+    // 监听主窗口转发的音乐意图
+    ipcRenderer.on('intent-music', (event, songName) => {
+      setTimeout(() => {
+        openMusicPlayer();
+        if (songName === '__random__') {
+          autoPlayRandomSong();
+        } else if (songName) {
+          autoPlaySong(songName);
+        }
+      }, 500);
+    });
+
     ipcRenderer.on('game-complete', (event, gameData) => {
       // 生成夸夸消息（以AI身份发送）
       let praiseMsg = '';
@@ -3009,6 +3129,25 @@ ${extraContext}
     }
 
     // ===== 自动搜索并播放歌曲 =====
+    // 推荐歌单（当用户说"听歌"但没指定歌名时随机选取）
+    const RECOMMENDED_SONGS = [
+      '晴天 周杰伦', '起风了 买辣椒也用券', '平凡之路 朴树', '光年之外 邓紫棋',
+      '夜曲 周杰伦', '后来 刘若英', '小幸运 田馥甄', '告白气球 周杰伦',
+      '遥远的她 张学友', '岁月神偷 金玟岐', '漠河舞厅 柳爽', '错位时空 艾辰',
+      '稻香 周杰伦', '七里香 周杰伦', '遇见 孙燕姿', '安静 周杰伦',
+      '慢慢喜欢你 莫文蔚', '体面 于文文', '说散就散 袁娅维', '刻在我心底的名字 卢广仲',
+      '想见你想见你想见你 八三夭', '孤勇者 陈奕迅', '这世界那么多人 莫文蔚',
+      '夏天的风 温岚', '知足 五月天', '突然好想你 五月天', '温柔 五月天',
+      '晚安 颜人中', '像风一样 薛之谦', '演员 薛之谦', '江南 林俊杰',
+      '修炼爱情 林俊杰', '可惜没如果 林俊杰', '她说 林俊杰', '不为谁而作的歌 林俊杰',
+    ];
+
+    function autoPlayRandomSong() {
+      const randomSong = RECOMMENDED_SONGS[Math.floor(Math.random() * RECOMMENDED_SONGS.length)];
+      showToast(`🎵 随机推荐一首，马上播放~`);
+      autoPlaySong(randomSong);
+    }
+
     async function autoPlaySong(songName) {
       const list = document.getElementById('musicList');
       list.innerHTML = '<div class="music-loading">正在为你搜索《' + escapeHtml(songName) + '》...💗</div>';
