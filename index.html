@@ -342,6 +342,7 @@
         label: moodConfig[moodKey].label,
         time: now.toLocaleString('zh-CN', { hour12: false }),
         ts: now.getTime(),
+        content: '',
       });
       // 最多保留 200 条
       if (records.length > 200) records.splice(200);

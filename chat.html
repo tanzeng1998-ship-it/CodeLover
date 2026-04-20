@@ -3244,8 +3244,16 @@ ${extraContext}
     function saveMood(mood) {
       const logs = JSON.parse(localStorage.getItem(MOOD_KEY) || '[]');
       const now = new Date();
-      const localTime = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}T${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-      logs.unshift({ mood, time: localTime, note: '' });
+      const localTime = now.toLocaleString('zh-CN', { hour12: false });
+      const cfg = moodConfig[mood] || {};
+      logs.unshift({
+        mood,
+        emoji: cfg.emoji || '😐',
+        label: cfg.label || '',
+        time: localTime,
+        ts: now.getTime(),
+        content: '',
+      });
       if (logs.length > 200) logs.splice(200);
       localStorage.setItem(MOOD_KEY, JSON.stringify(logs));
     }

@@ -186,6 +186,112 @@
     .empty .empty-icon { font-size: 48px; display: block; margin-bottom: 12px; }
     .empty p { font-size: 14px; }
 
+    /* 日记输入区 */
+    .diary-input-area {
+      margin: 10px 16px;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 14px;
+      border: 1px solid rgba(255,160,185,0.35);
+      box-shadow: 0 2px 12px rgba(255,140,170,0.1);
+    }
+    .diary-input-area textarea {
+      width: 100%;
+      min-height: 72px;
+      border: 1px solid rgba(255,160,185,0.3);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-family: inherit;
+      color: #5a3a4a;
+      background: rgba(255,245,248,0.5);
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .diary-input-area textarea::placeholder { color: #d0a0b0; }
+    .diary-input-area textarea:focus { border-color: #FF9AAF; }
+    .diary-input-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .diary-mood-btns {
+      display: flex;
+      gap: 6px;
+      flex: 1;
+    }
+    .diary-mood-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,160,185,0.3);
+      background: transparent;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .diary-mood-btn:hover { border-color: #FF9AAF; transform: scale(1.1); }
+    .diary-mood-btn.selected {
+      border-color: #FF9AAF;
+      background: rgba(255,183,197,0.35);
+      transform: scale(1.1);
+    }
+    .diary-submit-btn {
+      padding: 6px 16px;
+      background: linear-gradient(135deg, #FFB7C5 0%, #FF9AAF 100%);
+      border: none;
+      border-radius: 16px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .diary-submit-btn:hover { transform: scale(1.05); opacity: 0.9; }
+    .diary-submit-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* 日记内容文字 */
+    .record .diary-content {
+      font-size: 12px;
+      color: #8a6070;
+      margin-top: 4px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* 黑金主题 - 日记输入区 */
+    body.theme-dark .diary-input-area {
+      background: rgba(20,15,3,0.98);
+      border-color: rgba(160,130,50,0.22);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    }
+    body.theme-dark .diary-input-area textarea {
+      background: rgba(14,10,2,0.6);
+      border-color: rgba(160,130,50,0.2);
+      color: #c3ad5f;
+    }
+    body.theme-dark .diary-input-area textarea::placeholder { color: rgba(160,130,50,0.35); }
+    body.theme-dark .diary-input-area textarea:focus { border-color: #b89840; }
+    body.theme-dark .diary-mood-btn {
+      border-color: rgba(160,130,50,0.22);
+    }
+    body.theme-dark .diary-mood-btn:hover { border-color: #b89840; }
+    body.theme-dark .diary-mood-btn.selected {
+      border-color: #b89840;
+      background: rgba(160,130,50,0.15);
+    }
+    body.theme-dark .diary-submit-btn {
+      background: linear-gradient(135deg, #9a7c20 0%, #6a5410 100%);
+    }
+    body.theme-dark .record .diary-content { color: rgba(160,130,50,0.65); }
+
     /* 清空按钮 */
     .clear-btn {
       display: block;
@@ -350,6 +456,19 @@
     <button class="filter-btn" data-filter="happy">😊 开心</button>
     <button class="filter-btn" data-filter="neutral">😐 平和</button>
     <button class="filter-btn" data-filter="sad">😢 不开心</button>
+    <button class="filter-btn" data-filter="diary">📝 日记</button>
+  </div>
+
+  <div class="diary-input-area">
+    <textarea id="diaryInput" placeholder="今天想写点什么..."></textarea>
+    <div class="diary-input-bar">
+      <div class="diary-mood-btns">
+        <button class="diary-mood-btn selected" data-mood="happy" title="开心">😊</button>
+        <button class="diary-mood-btn" data-mood="neutral" title="平和">😐</button>
+        <button class="diary-mood-btn" data-mood="sad" title="不开心">😢</button>
+      </div>
+      <button class="diary-submit-btn" id="diarySubmit">写好了</button>
+    </div>
   </div>
 
   <div class="kudos-area" id="kudosArea">
@@ -488,7 +607,7 @@
       document.getElementById('countSad').textContent    = records.filter(r => r.mood === 'sad').length;
 
       const total = records.length;
-      const sub = total === 0 ? '还没有记录，去点击电脑上的心情吧~'
+      const sub = total === 0 ? '还没有记录，写篇日记吧~'
         : `共 ${total} 条记录`;
       document.getElementById('headerSub').textContent = sub;
     }
@@ -508,14 +627,22 @@
       const records = getRecords();
       renderStats(records);
 
-      const filtered = currentFilter === 'all' ? records : records.filter(r => r.mood === currentFilter);
+      let filtered;
+      if (currentFilter === 'diary') {
+        filtered = records.filter(r => r.content);
+      } else if (currentFilter === 'all') {
+        filtered = records;
+      } else {
+        filtered = records.filter(r => r.mood === currentFilter);
+      }
+
       const list = document.getElementById('list');
 
       if (filtered.length === 0) {
         list.innerHTML = `
           <div class="empty">
             <span class="empty-icon">📭</span>
-            <p>暂无记录，去打个心情吧～</p>
+            <p>暂无记录，写篇日记吧～</p>
           </div>`;
         return;
       }
@@ -528,12 +655,14 @@
         groups[date].forEach(r => {
           const info = moodMap[r.mood] || { emoji: '😐', label: '未知' };
           const timeStr = r.time ? r.time.replace('T', ' ').substring(0, 19) : '';
+          const contentHtml = r.content ? `<div class="diary-content">${r.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>` : '';
           html += `
             <div class="record ${r.mood}">
               <span class="mood-emoji">${info.emoji}</span>
               <div class="info">
-                <div class="mood-label">${info.label}</div>
-                <div class="mood-time">${timeStr}</div>
+                <div class="mood-label">${r.content ? '📝 ' : ''}${info.label}</div>
+
+                ${contentHtml}
               </div>
             </div>`;
         });
@@ -554,10 +683,48 @@
 
     // 清空
     document.getElementById('clearBtn').addEventListener('click', () => {
-      if (confirm('确定要清空所有心情记录吗？')) {
+      if (confirm('确定要清空所有心情记录和日记吗？')) {
         localStorage.removeItem(MOOD_KEY);
         renderList();
       }
+    });
+
+    // ===== 日记输入逻辑 =====
+    let selectedMood = 'happy';
+
+    document.querySelectorAll('.diary-mood-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.diary-mood-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedMood = btn.dataset.mood;
+      });
+    });
+
+    document.getElementById('diarySubmit').addEventListener('click', () => {
+      const textarea = document.getElementById('diaryInput');
+      const content = textarea.value.trim();
+      if (!content) return;
+
+      const now = new Date();
+      const moodEmoji = { happy: '😊', neutral: '😐', sad: '😢' }[selectedMood];
+      const moodLabel = { happy: '开心', neutral: '平和', sad: '不开心' }[selectedMood];
+
+      // 统一存入 MOOD_KEY，带 content 字段
+      const records = JSON.parse(localStorage.getItem(MOOD_KEY) || '[]');
+      records.unshift({
+        mood: selectedMood,
+        emoji: moodEmoji,
+        label: moodLabel,
+        time: now.toLocaleString('zh-CN', { hour12: false }),
+        ts: now.getTime(),
+        content: content,
+      });
+      if (records.length > 200) records.splice(200);
+      localStorage.setItem(MOOD_KEY, JSON.stringify(records));
+
+      textarea.value = '';
+      renderList();
+      refreshKudos();
     });
 
     renderList();
