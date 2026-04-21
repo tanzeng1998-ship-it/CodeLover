@@ -176,6 +176,19 @@ ipcMain.on('open-diary', () => {
   createDiaryWindow();
 });
 
+// 清除所有本地数据
+ipcMain.on('clear-all-data', () => {
+  if (win && !win.isDestroyed()) {
+    win.webContents.executeJavaScript('localStorage.clear(); location.reload();');
+  }
+  if (chatWin && !chatWin.isDestroyed()) {
+    chatWin.webContents.executeJavaScript('localStorage.clear(); location.reload();');
+  }
+  if (diaryWin && !diaryWin.isDestroyed()) {
+    diaryWin.webContents.executeJavaScript('localStorage.clear(); location.reload();');
+  }
+});
+
 // 打开对话框窗口
 ipcMain.on('open-chat', () => {
   createChatWindow();

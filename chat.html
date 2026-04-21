@@ -1950,8 +1950,8 @@
       const MOOD_KEYWORDS = {
         extreme: {
           keywords: ['离婚', '分手', '散了吧', '别联系了', '拉黑', '删除', '结束了', '一刀两断', '再见了', '永别', '不爱你了', '不爱了', '不要再见了', '算了吧', '到此为止', '形同陌路', '各走各的', '我们完了', 'game over'],
-          penalty: 0, // 直接归零
-          aiMsg: '...好。如果这是你的决定。'
+          penalty: 0, // 直接归零（第三次确认时）
+          aiMsg: '...等等，你认真的吗？能不能再想想？'
         },
         heavy: {
           keywords: ['不想理你', '烦死了', '讨厌你', '滚', '别烦我', '够了', '离我远点', '受够了', '忍够了', '不想和你说话', '别碰我', '不要你了', '后悔认识你', '别出现在我面前'],
@@ -1995,7 +1995,7 @@
         return {
           affection: 0, stage: 1, lastInteraction: Date.now(),
           lastDailyBonus: null, memory: [], stageHistory: [{ stage: 1, date: new Date().toISOString() }],
-          breakupCount: 0, breakups: [], isReconciling: false
+          breakupCount: 0, breakups: [], isReconciling: false, breakupWarnings: 0
         };
       }
 
@@ -2094,6 +2094,32 @@
         const oldStageId = oldStage.id;
 
         if (result.isExtreme) {
+          // 挽留机制：前两次说分手/离婚时进行挽留，不执行分手
+          if (!p.breakupWarnings) p.breakupWarnings = 0;
+          
+          if (p.breakupWarnings < 2) {
+            // 挽留阶段：不归零，只扣部分好感
+            p.breakupWarnings++;
+            const persuadePenalty = -Math.floor(p.affection * 0.15); // 扣当前好感的15%
+            p.affection = Math.max(0, p.affection + persuadePenalty);
+            p.lastInteraction = Date.now();
+            saveProgression(p);
+            
+            const newStage = getCurrentStage(p.affection);
+            return {
+              oldStageName: oldStage.name,
+              newStage: newStage,
+              newStageName: newStage.name,
+              stageDown: newStage.id < oldStageId,
+              isExtreme: false,
+              penalty: persuadePenalty,
+              isPersuading: true, // 标记为挽留状态
+              persuadeRound: p.breakupWarnings, // 第几次挽留
+              matchedKeyword: result.matchedKeyword
+            };
+          }
+          
+          // 第三次确认：执行分手
           // 极端情况：好感度归零，进入二次复合
           if (!p.breakups) p.breakups = [];
           if (!p.breakupCount) p.breakupCount = 0;
@@ -2107,6 +2133,7 @@
           p.affection = 0;
           p.isReconciling = true;
           p.stage = 1;
+          p.breakupWarnings = 0; // 重置挽留计数
           if (!p.stageHistory) p.stageHistory = [];
           p.stageHistory.push({ stage: 1, date: new Date().toISOString(), event: 'breakup', trigger: result.matchedKeyword });
         } else {
@@ -2333,7 +2360,13 @@ ${extraContext}
 
 【自然语言交互】用户可以通过自然语言触发以下操作（系统已自动识别并执行，你不需要重复动作，只需自然回应即可）：
 - 音乐：当用户说"一起听歌"、"听《晴天》"等，系统会自动搜索并播放歌曲（指定歌名则播放指定歌曲，否则随机推荐一首），你只需用温柔的方式回应，比如"好，已经帮你放好了~"。
-- 游戏：当用户说"打游戏"、"来一局"等，系统会自动打开游戏，你只需回应，比如"好呀，我看着你玩~"。`;
+- 游戏：当用户说"打游戏"、"来一局"等，系统会自动打开游戏，你只需回应，比如"好呀，我看着你玩~"。
+
+【挽留机制】当用户说"分手"、"离婚"等极端负面词语时，你不能立即同意分手，但也不要求着对方：
+- 第1次：平静地表达不想分开，但不是恳求。比如"我不想分手，我们之间有什么问题可以好好说。"
+- 第2次：认真地问清楚原因，表达不舍但不卑微。比如"你确定想好了吗？我是不想走的。"
+- 第3次：如果对方依然坚持，你会尊重对方的选择，平静接受。
+- 如果对方在挽留后恢复正常对话，说明回心转意，你自然地继续相处就好`;
       } else {
         prompt = `${basePrompt}
 
@@ -2341,7 +2374,13 @@ ${extraContext}
 
 【自然语言交互】用户可以通过自然语言触发以下操作（系统已自动识别并执行，你不需要重复动作，只需自然回应即可）：
 - 音乐：当用户说"一起听歌"、"听《晴天》"等，系统会自动搜索并播放歌曲（指定歌名则播放指定歌曲，否则随机推荐一首），你只需用温柔的方式回应，比如"好，已经帮你放好了~"。
-- 游戏：当用户说"打游戏"、"来一局"等，系统会自动打开游戏，你只需回应，比如"好呀，我看着你玩~"。`;
+- 游戏：当用户说"打游戏"、"来一局"等，系统会自动打开游戏，你只需回应，比如"好呀，我看着你玩~"。
+
+【挽留机制】当用户说"分手"、"离婚"等极端负面词语时，你不能立即同意分手，但也不要求着对方：
+- 第1次：平静地表达不想分开，但不是恳求。比如"我不想分手，我们之间有什么问题可以好好说。"
+- 第2次：认真地问清楚原因，表达不舍但不卑微。比如"你确定想好了吗？我是不想走的。"
+- 第3次：如果对方依然坚持，你会尊重对方的选择，平静接受。
+- 如果对方在挽留后恢复正常对话，说明回心转意，你自然地继续相处就好`;
       }
       _systemPromptCache = prompt;
       return prompt;
@@ -2676,6 +2715,9 @@ ${extraContext}
         // 显示惩罚反馈
         if (penaltyApplied.isExtreme) {
           showBreakupToast(penaltyApplied.oldStageName);
+        } else if (penaltyApplied.isPersuading) {
+          // 挽留阶段：不显示归零toast，显示挽留提示
+          showPersuadeToast(penaltyApplied);
         } else {
           showPenaltyToast(penaltyApplied);
         }
@@ -2690,6 +2732,12 @@ ${extraContext}
             setTimeout(() => showStageUp(result.newStage.name), 500);
           }
           updateProgressionUI();
+        }
+        // 正常互动时，重置挽留警告计数（用户回心转意了）
+        const p = getProgression();
+        if (p.breakupWarnings > 0) {
+          p.breakupWarnings = 0;
+          saveProgression(p);
         }
         // 发送消息获得金币
         addCoins(2, '发送消息');
@@ -2728,6 +2776,15 @@ ${extraContext}
         intentContext = '\n\n【系统提示】用户刚表达了听歌的意图，系统已自动搜索并播放歌曲（如用户指定了歌名则播放指定歌曲，否则随机推荐一首）。请自然地回应，比如"好，已经帮你放好了~"，语气温柔。';
       } else if (intentResult.intent === 'game') {
         intentContext = '\n\n【系统提示】用户刚表达了玩游戏的意图，系统已自动打开游戏窗口。请自然地回应，表示你看着他玩/陪他玩，语气轻松鼓励。';
+      }
+
+      // 挽留上下文：用户说分手/离婚但处于挽留阶段
+      if (penaltyApplied && penaltyApplied.isPersuading) {
+        if (penaltyApplied.persuadeRound === 1) {
+          intentContext += '\n\n【系统提示·挽留】用户刚说了分手/离婚相关的话，这是第一次挽留。你需要挽留，但态度要平和，不要恳求或卑微。平静地表达不想分开，问问是什么问题，比如"我不想分手，我们有什么问题可以好好说。"保持自尊和理性。';
+        } else {
+          intentContext += '\n\n【系统提示·挽留】用户又一次说了分手/离婚，这是第二次挽留。仍然要挽留，态度认真但不卑微。比如"你确定想好了吗？我是不想走的。"如果用户再说第三次，你才会接受。';
+        }
       }
 
       try {
@@ -3542,6 +3599,25 @@ ${extraContext}
 
       titleEl.textContent = '关系归零';
       subEl.innerHTML = `从「${fromStageName}」回到了原点<br>如果你想重新开始，${p.breakupCount > 0 ? '这次请认真一点' : '我还在这里'}`;
+
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+
+    function showPersuadeToast(penaltyResult) {
+      const p = getProgression();
+      const round = penaltyResult.persuadeRound;
+      const toast = document.getElementById('breakupToast');
+      const titleEl = document.getElementById('breakupTitle');
+      const subEl = document.getElementById('breakupSub');
+
+      if (round === 1) {
+        titleEl.textContent = '💔 不想分开';
+        subEl.innerHTML = `好感度 -${Math.abs(penaltyResult.penalty)}<br>我们有什么问题可以好好说`;
+      } else {
+        titleEl.textContent = '💔 你确定吗';
+        subEl.innerHTML = `好感度 -${Math.abs(penaltyResult.penalty)}<br>我是不想走的`;
+      }
 
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 4000);
