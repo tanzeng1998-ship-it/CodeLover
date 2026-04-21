@@ -196,6 +196,43 @@
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 4px 14px rgba(100,200,100,0.2);
     }
 
+    .btn-danger {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid rgba(220,80,80,0.4);
+      border-radius: 12px;
+      color: #c05050;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 10px;
+    }
+    .btn-danger:hover {
+      background: rgba(220,80,80,0.08);
+      border-color: rgba(220,80,80,0.6);
+    }
+
+    .danger-card {
+      background: rgba(255,240,240,0.85);
+      border: 1px solid rgba(220,80,80,0.25);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      margin-top: 24px;
+      text-align: center;
+    }
+    .danger-card .card-title {
+      color: #c05050;
+      justify-content: center;
+    }
+    .danger-card p {
+      font-size: 12px;
+      color: #a07070;
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+
     .toast {
       position: fixed;
       top: 20px;
@@ -312,6 +349,20 @@
       background: linear-gradient(135deg, #5a7a3a 0%, #3a5a20 100%);
       border-color: #5a7a3a;
     }
+    body.theme-dark .danger-card {
+      background: rgba(40,10,10,0.6);
+      border-color: rgba(180,60,60,0.25);
+    }
+    body.theme-dark .danger-card .card-title { color: #c06060; }
+    body.theme-dark .danger-card p { color: rgba(160,100,100,0.6); }
+    body.theme-dark .btn-danger {
+      border-color: rgba(180,60,60,0.4);
+      color: #c06060;
+    }
+    body.theme-dark .btn-danger:hover {
+      background: rgba(180,60,60,0.1);
+      border-color: rgba(180,60,60,0.6);
+    }
     body.theme-dark .toast {
       background: rgba(16,12,2,0.98);
       border-color: rgba(160,130,50,0.35);
@@ -384,6 +435,12 @@
     </div>
 
     <button class="btn-save" id="saveBtn">保存设置</button>
+
+    <div class="danger-card">
+      <div class="card-title">⚠️ 重置数据</div>
+      <p>清除所有聊天记录、好感度、金币等数据，回到初始状态。</p>
+      <button class="btn-danger" id="clearDataBtn">清除所有数据</button>
+    </div>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -495,6 +552,18 @@
     document.getElementById('closeBtn').addEventListener('click', () => {
       const { ipcRenderer } = require('electron');
       ipcRenderer.send('close-settings');
+    });
+
+    // 清除所有数据
+    document.getElementById('clearDataBtn').addEventListener('click', () => {
+      const confirmed = confirm('确定要清除所有数据吗？\n\n这将删除所有聊天记录、好感度进度、金币、日记等，回到初始状态。\n此操作不可撤销。');
+      if (!confirmed) return;
+
+      const doubleConfirm = confirm('真的确定吗？所有数据将无法恢复。');
+      if (!doubleConfirm) return;
+
+      const { ipcRenderer } = require('electron');
+      ipcRenderer.send('clear-all-data');
     });
   </script>
 </body>
